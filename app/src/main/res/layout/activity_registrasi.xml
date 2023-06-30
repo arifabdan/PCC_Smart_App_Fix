@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Registrasi"
+    android:background="#F99417"
+    >
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/logo"
+        android:layout_marginLeft="125dp"
+        android:layout_marginTop="50dp">
+    </ImageView>
+
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/logo"
+        android:layout_marginLeft="90dp"
+        android:fontFamily="@font/poppins"
+        android:text="Silahkan Registrasi"
+        android:textColor="@color/black"
+        android:textSize="19dp"
+        android:textStyle="bold">
+    </TextView>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
+
+        <EditText
+            android:id="@+id/emailEditText"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            />
+
+    <EditText
+        android:id="@+id/usernameEditText"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint="Username"
+        android:layout_below="@id/emailEditText"/>
+
+
+    <EditText
+        android:id="@+id/tahungbgEditText"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/usernameEditText"
+        android:hint="Tahun Gabung "
+         />
+
+    <Spinner
+        android:id="@+id/roleSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/tahungbgEditText"
+    />
+
+        <EditText
+            android:id="@+id/passwordEditText"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_below="@id/roleSpinner"
+            android:hint="Password"
+            android:inputType="textPassword"
+            />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:layout_marginLeft="45dp"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/kembali"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:backgroundTint="@color/white"
+            android:fontFamily="@font/poppins"
+            android:text="KEMBALI"
+            android:textColor="@color/black"
+            android:textSize="15dp" />
+
+        <Button
+            android:id="@+id/registrasi"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:text="Register"
+            android:layout_toRightOf="@+id/kembali"
+            android:textColor="@color/black"
+            android:fontFamily="@font/poppins"
+            android:textSize="15dp"
+            android:backgroundTint="@color/white"
+            android:layout_marginLeft="15dp"
+            />
+    </RelativeLayout>
+
+</RelativeLayout>

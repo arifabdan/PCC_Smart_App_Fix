@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "193987934699",
+    "firebase_url": "https://pcc-smart-app-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "pcc-smart-app",
+    "storage_bucket": "pcc-smart-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:193987934699:android:9bf7837d7980edba5601ae",
+        "android_client_info": {
+          "package_name": "com.example.pccsmartapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "193987934699-lb7mj51jnu8pr7ushd0md5qc6buaroua.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDiBPkVTEjWDxZ4MtH_TVFBCjYmueXQnD4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "193987934699-ar237ot6sk52ogf295aa576ib0d84km7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

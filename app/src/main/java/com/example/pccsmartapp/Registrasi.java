@@ -35,6 +35,7 @@ public class Registrasi extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registrasi);
+        getSupportActionBar().hide();
 
         firebaseAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -79,7 +80,7 @@ public class Registrasi extends AppCompatActivity {
                                         saveData(userID, email, username, tahungbg, role, password);
                                     }
                                 } else {
-                                    Toast.makeText(Registrasi.this, "Registrasi Gagal", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(Registrasi.this, "Registrasi Gagal" , Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });

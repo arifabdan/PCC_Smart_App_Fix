@@ -1,32 +1,48 @@
 package com.example.pccsmartapp.ui.home;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.pccsmartapp.R;
 import com.example.pccsmartapp.databinding.FragmentHomeBinding;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.PlaceLikelihood;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -35,14 +51,23 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class HomeFragment extends Fragment implements OnMapReadyCallback {
+import java.util.Arrays;
+import java.util.List;
 
+public class HomeFragment extends Fragment implements OnMapReadyCallback, SensorEventListener {
+
+    private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
     private FragmentHomeBinding binding;
     private GoogleMap map;
+    private PlacesClient placesClient;
     private FusedLocationProviderClient fusedLocationProviderClient;
-    private DatabaseReference userLocationData;
+    private DatabaseReference userLocationData, userRef;
     private LocationCallback locationCallback;
     private Marker userMarker;
+    private Button searchbutton;
+    private String userRole;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -53,29 +78,44 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        sensorManager = (SensorManager) requireActivity().getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        Places.initialize(requireContext(), "AIzaSyCuCk-V1xx4wjZuexn58sUO-sMxYjZX7qA");
+        placesClient = Places.createClient(requireContext());
+
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
+        searchbutton = root.findViewById(R.id.caribtn);
+        searchbutton.setVisibility(View.GONE);
+        searchbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getCurrentLocation();
+            }
+        });
+
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.maps);
-        if (mapFragment != null){
+        if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
 
         userLocationData = FirebaseDatabase.getInstance().getReference("User_Location");
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null){
+        if (user != null) {
             String userId = user.getUid();
             DatabaseReference userRole = FirebaseDatabase.getInstance().getReference("users").child(userId).child("role");
 
             userRole.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.exists()){
+                    if (snapshot.exists()) {
                         String role = snapshot.getValue(String.class);
-                        if (role != null){
-                            if (role.equals("Staff")){
+                        if (role != null) {
+                            if (role.equals("Staff")) {
 
-                            } else if (role.equals("Anggota")){
+                            } else if (role.equals("Anggota")) {
                                 reqLocationUpdates();
 
                             }
@@ -105,7 +145,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    private void reqLocationUpdates(){
+    private void reqLocationUpdates() {
         LocationRequest locationRequest = LocationRequest.create()
                 .setInterval(1000)
                 .setFastestInterval(2000)
@@ -114,9 +154,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
-                for (Location location : locationResult.getLocations()){
+                for (Location location : locationResult.getLocations()) {
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                    if (user != null){
+                    if (user != null) {
                         String userId = user.getUid();
                         DatabaseReference userLocationData = FirebaseDatabase.getInstance().getReference("User_Location").child(userId);
                         userLocationData.child("latitude").setValue(location.getLatitude());
@@ -126,10 +166,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         userData.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if(snapshot.exists()){
+                                if (snapshot.exists()) {
                                     String username = snapshot.child("username").getValue(String.class);
-                                    if (username != null){
-                                        if (userMarker == null){
+                                    if (username != null) {
+                                        if (userMarker == null) {
                                             userMarker = map.addMarker(new MarkerOptions()
                                                     .position(new LatLng(location.getLatitude(), location.getLongitude()))
                                                     .title(username));
@@ -158,11 +198,131 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         }
 
     }
-    private void addMarkerUsername (String username, LatLng latLng){
+
+    public void onResume() {
+        super.onResume();
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    public void onPause() {
+        super.onPause();
+        sensorManager.unregisterListener(this);
+    }
+
+    public void onSensorChanged(SensorEvent event) {
+        float x = Math.abs(event.values[0]);
+        float y = Math.abs(event.values[1]);
+        float z = Math.abs(event.values[2]);
+
+            if (x > 15 || y > 15 || z > 15) {
+                searchbutton.setVisibility(View.VISIBLE);
+                searchbutton.setEnabled(true);
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+
+    private void getCurrentLocation() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(requireActivity(), location -> {
+                if (location != null) {
+                    findNearestHospital();
+                } else {
+                    Toast.makeText(requireContext(), "Lokasi tidak tersedia.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
+
+    private void addMarkerUsername(String username, LatLng latLng) {
         map.addMarker(new MarkerOptions()
                 .position(latLng)
                 .title(username));
     }
+
+    @SuppressLint("MissingPermission")
+    private void findNearestHospital() {
+        List<Place.Field> placeFields = Arrays.asList(
+                Place.Field.NAME,
+                Place.Field.ADDRESS,
+                Place.Field.TYPES
+        );
+
+        FirebaseDatabase.getInstance().getReference("Users_Location").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()){
+                    DataSnapshot lastlocation = snapshot.getChildren().iterator().next();
+                    double latitude = lastlocation.child("latitude").getValue(Double.class);
+                    double longitude = lastlocation.child("longitude").getValue(Double.class);
+
+                    LatLng latLng = new LatLng(latitude, longitude);
+                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+
+                    FindCurrentPlaceRequest request = FindCurrentPlaceRequest.newInstance(placeFields);
+                    placesClient.findCurrentPlace(request).addOnSuccessListener(findCurrentPlaceResponse -> {
+                        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
+                                    placesClient.findCurrentPlace(request).addOnSuccessListener(response -> {
+                                        FindCurrentPlaceResponse currentPlaceResponse = response;
+                                        List<PlaceLikelihood> placeLikelihoods = currentPlaceResponse.getPlaceLikelihoods();
+
+                                        if (!placeLikelihoods.isEmpty()) {
+                                            PlaceLikelihood likelihood = placeLikelihoods.get(0);
+                                            Place currentPlace = likelihood.getPlace();
+
+                                            String placeName = currentPlace.getName();
+                                            String placeAddress = currentPlace.getAddress();
+                                            LatLng placeLocation = currentPlace.getLatLng();
+
+                                            Toast.makeText(requireContext(), "Tempat pengobatan terdekat: " + placeName + ", " + placeAddress, Toast.LENGTH_SHORT).show();
+
+                                            map.addMarker(new MarkerOptions()
+                                                    .position(placeLocation)
+                                                    .title(placeName)
+                                                    .snippet(placeAddress));
+                                        } else {
+                                            Toast.makeText(requireContext(), "Tidak ada tempat pengobatan ditemukan.", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }).addOnFailureListener(e -> {
+                                        if (e instanceof ApiException) {
+                                            ApiException apiException = (ApiException) e;
+                                            int statusCode = apiException.getStatusCode();
+                                        }
+                                    });
+                            });
+                        }
+
+                    });
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_ACCESS_FINE_LOCATION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getCurrentLocation();
+            } else {
+                Toast.makeText(requireContext(), "Izin akses lokasi ditolak.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     @Override
     public void onDestroyView(){
         super.onDestroyView();

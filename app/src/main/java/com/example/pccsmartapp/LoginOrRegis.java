@@ -3,6 +3,7 @@ package com.example.pccsmartapp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +17,7 @@ Button toLoginPage, toRegisPage;
         getSupportActionBar().hide();
         toLoginPage = findViewById(R.id.toLoginPage);
         toRegisPage = findViewById(R.id.toRegisPage);
+
 
         toLoginPage.setOnClickListener(new View.OnClickListener() {
             @Override

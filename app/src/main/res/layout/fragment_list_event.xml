@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.listevent.ListEventFragment">
+
+    <fragment
+        android:id="@+id/mapsevent"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/inputlayout"/>
+
+    <LinearLayout
+        android:id="@+id/inputlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:layout_marginBottom="70dp"
+        android:padding="16dp">
+        <EditText
+            android:id="@+id/titikawal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Masukkan Titik Awal"/>
+
+        <EditText
+            android:id="@+id/tujuan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Tujuan"/>
+
+        <Button
+            android:id="@+id/lihatrute"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lihat Rute"/>
+    </LinearLayout>
+
+
+</RelativeLayout>

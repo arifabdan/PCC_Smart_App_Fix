@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -80,7 +81,8 @@ public class Registrasi extends AppCompatActivity {
                                         saveData(userID, email, username, tahungbg, role, password);
                                     }
                                 } else {
-                                    Toast.makeText(Registrasi.this, "Registrasi Gagal" , Toast.LENGTH_SHORT).show();
+                                    String Error = task.getException().getMessage();
+                                    Toast.makeText(Registrasi.this, "Registrasi Gagal" + Error , Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });

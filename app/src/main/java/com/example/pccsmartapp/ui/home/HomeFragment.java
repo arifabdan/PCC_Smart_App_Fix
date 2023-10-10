@@ -3,12 +3,14 @@ package com.example.pccsmartapp.ui.home;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +24,10 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.pccsmartapp.MyService;
 import com.example.pccsmartapp.R;
+
+
 import com.example.pccsmartapp.databinding.FragmentHomeBinding;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -78,6 +83,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        Intent serviceI = new Intent(getActivity(), MyService.class);
+        getActivity().startService(serviceI);
+
+
         sensorManager = (SensorManager) requireActivity().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
@@ -87,19 +96,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
         searchbutton = root.findViewById(R.id.caribtn);
-        searchbutton.setVisibility(View.GONE);
-        searchbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getCurrentLocation();
-            }
-        });
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.maps);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
-
         userLocationData = FirebaseDatabase.getInstance().getReference("User_Location");
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -114,10 +115,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
                         String role = snapshot.getValue(String.class);
                         if (role != null) {
                             if (role.equals("Staff")) {
-
+                                searchbutton.setVisibility(View.VISIBLE);
+                                searchbutton.setEnabled(true);
                             } else if (role.equals("Anggota")) {
                                 reqLocationUpdates();
-
+                                searchbutton.setVisibility(View.GONE);
+                                searchbutton.setEnabled(false);
                             }
                         }
                     }
@@ -137,6 +140,30 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
 
+        userLocationData.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+
+                for (DataSnapshot lastlocation : snapshot.getChildren()){
+                    String UID = lastlocation.getKey();
+                    String username = lastlocation.child("username").getValue(String.class);
+                    double latitude = lastlocation.child("latitude").getValue(Double.class);
+                    double longitude = lastlocation.child("longitude").getValue(Double.class);
+
+                    LatLng latLng = new LatLng(latitude, longitude);
+                   if (latitude != 0 && longitude != 0){
+                       MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(username);
+                       googleMap.addMarker(markerOptions);
+                   }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             map.setMyLocationEnabled(true);
@@ -147,9 +174,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
 
     private void reqLocationUpdates() {
         LocationRequest locationRequest = LocationRequest.create()
-                .setInterval(1000)
-                .setFastestInterval(2000)
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(500)
+                .setFastestInterval(1000);
+
 
         locationCallback = new LocationCallback() {
             @Override
@@ -159,16 +187,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
                     if (user != null) {
                         String userId = user.getUid();
                         DatabaseReference userLocationData = FirebaseDatabase.getInstance().getReference("User_Location").child(userId);
-                        userLocationData.child("latitude").setValue(location.getLatitude());
-                        userLocationData.child("longitude").setValue(location.getLongitude());
-
                         DatabaseReference userData = FirebaseDatabase.getInstance().getReference("users").child(userId);
                         userData.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if (snapshot.exists()) {
+                                if (snapshot.exists()){
                                     String username = snapshot.child("username").getValue(String.class);
-                                    if (username != null) {
+                                    if (username != null){
+                                        userLocationData.child("username").setValue(username);
+                                        userLocationData.child("latitude").setValue(location.getLatitude());
+                                        userLocationData.child("longitude").setValue(location.getLongitude());
                                         if (userMarker == null) {
                                             userMarker = map.addMarker(new MarkerOptions()
                                                     .position(new LatLng(location.getLatitude(), location.getLongitude()))
@@ -185,6 +213,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
 
                             }
                         });
+
                     }
                 }
             }
@@ -210,13 +239,42 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
     }
 
     public void onSensorChanged(SensorEvent event) {
-        float x = Math.abs(event.values[0]);
-        float y = Math.abs(event.values[1]);
-        float z = Math.abs(event.values[2]);
+        double Ax = Math.abs(event.values[0]);
+        double Ay = Math.abs(event.values[1]);
+        double Az = Math.abs(event.values[2]);
 
-            if (x > 15 || y > 15 || z > 15) {
-                searchbutton.setVisibility(View.VISIBLE);
-                searchbutton.setEnabled(true);
+        double gravityRes = calculateSVM(Ax, Ay, Az);
+
+            if (gravityRes > 20.6) {
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                if (user != null) {
+                    String userId = user.getUid();
+                    DatabaseReference userRole = FirebaseDatabase.getInstance().getReference("users").child(userId).child("role");
+                    userRole.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.exists()) {
+                                String role = snapshot.getValue(String.class);
+                                if (role != null && role.equals("Staff")) {
+                                    searchbutton.setVisibility(View.VISIBLE);
+                                    searchbutton.setEnabled(true);
+                                    searchbutton.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            getCurrentLocation();
+                                        }
+                                    });
+                                    Toast.makeText(requireContext(), "Anggota Terjatuh", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            // Handle the error if needed
+                        }
+                    });
+                }
         }
     }
 
@@ -225,6 +283,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
 
     }
 
+    private double calculateSVM(double Ax, double Ay, double Az){
+        double sumSVM = (Ax * Ax) + (Ay * Ay) + (Az * Az);
+        return Math.sqrt(sumSVM);
+    }
 
     private void getCurrentLocation() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {

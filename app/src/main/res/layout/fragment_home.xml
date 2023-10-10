@@ -19,11 +19,14 @@
    <Button
        android:id="@+id/caribtn"
        android:layout_width="200dp"
-       android:layout_height="50dp"
+       android:layout_height="70dp"
        android:layout_centerInParent="true"
        android:layout_alignParentBottom="true"
        android:layout_marginBottom="125dp"
        android:text="Cari Tempat Pengobatan"
+       android:backgroundTint="#FA3737"
+       android:textColor="@color/white"
+       android:fontFamily="@font/poppins"
        />
 
 

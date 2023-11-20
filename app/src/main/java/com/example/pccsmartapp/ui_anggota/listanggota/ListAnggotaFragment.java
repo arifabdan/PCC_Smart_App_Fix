@@ -1,4 +1,4 @@
-package com.example.pccsmartapp.ui.profile;
+package com.example.pccsmartapp.ui_anggota.listanggota;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,22 +10,22 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.pccsmartapp.databinding.FragmentProfileBinding;
+import com.example.pccsmartapp.databinding.FragmentListAnggotaBinding;
 
-public class ProfileFragment extends Fragment {
+public class ListAnggotaFragment extends Fragment {
 
-    private FragmentProfileBinding binding;
+    private FragmentListAnggotaBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        ProfileViewModel profileViewModel =
-                new ViewModelProvider(this).get(ProfileViewModel.class);
+        ListAnggotaViewModel listAnggotaViewModel =
+                new ViewModelProvider(this).get(ListAnggotaViewModel.class);
 
-        binding = FragmentProfileBinding.inflate(inflater, container, false);
+        binding = FragmentListAnggotaBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textProfile;
-        profileViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        final TextView textView = binding.textListAnggota;
+        listAnggotaViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         return root;
     }
 

@@ -1,4 +1,4 @@
-package com.example.pccsmartapp.ui.listanggota;
+package com.example.pccsmartapp.ui_staff.listanggota;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -10,7 +10,7 @@ public class ListAnggotaViewModel extends ViewModel {
 
     public ListAnggotaViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is dashboard fragment");
+        mText.setValue("This is listevent fragment");
     }
 
     public LiveData<String> getText() {

@@ -1,4 +1,4 @@
-package com.example.pccsmartapp.ui.listanggota;
+package com.example.pccsmartapp.ui_staff.listanggota;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

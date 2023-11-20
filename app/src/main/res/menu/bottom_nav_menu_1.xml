@@ -15,10 +15,9 @@
         android:id="@+id/navigation_list_event"
         android:icon="@drawable/list_event"
         android:title="List Event" />
-
-    <item
-        android:id="@+id/navigation_profile"
-        android:icon="@drawable/ic_profile"
-        android:title="Profile" />
+<!--    <item-->
+<!--        android:id="@+id/navigation_registrasi"-->
+<!--        android:icon="@drawable/registrasi_icon"-->
+<!--        android:title="Registrasi Anggota"/>-->
 
 </menu>

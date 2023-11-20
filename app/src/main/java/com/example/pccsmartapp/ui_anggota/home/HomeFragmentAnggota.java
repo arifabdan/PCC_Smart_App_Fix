@@ -1,4 +1,4 @@
-package com.example.pccsmartapp.ui.home;
+package com.example.pccsmartapp.ui_anggota.home;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -10,7 +10,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +27,8 @@ import com.example.pccsmartapp.MyService;
 import com.example.pccsmartapp.R;
 
 
-import com.example.pccsmartapp.databinding.FragmentHomeBinding;
+import com.example.pccsmartapp.databinding.FragmentHome1Binding;
+import com.example.pccsmartapp.ui_staff.home.HomeViewModel;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -59,12 +59,12 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.Arrays;
 import java.util.List;
 
-public class HomeFragment extends Fragment implements OnMapReadyCallback, SensorEventListener {
+public class HomeFragmentAnggota extends Fragment implements OnMapReadyCallback, SensorEventListener {
 
     private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 1;
     private SensorManager sensorManager;
     private Sensor accelerometer;
-    private FragmentHomeBinding binding;
+    private FragmentHome1Binding binding;
     private GoogleMap map;
     private PlacesClient placesClient;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -73,14 +73,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
     private Marker userMarker;
     private Button searchbutton;
     private String userRole;
+    private OnFallDetectionListener fallDetectionListener;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        HomeViewModel homeViewModel =
+        com.example.pccsmartapp.ui_staff.home.HomeViewModel homeViewModel =
                 new ViewModelProvider(this).get(HomeViewModel.class);
 
-        binding = FragmentHomeBinding.inflate(inflater, container, false);
+        binding = FragmentHome1Binding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         Intent serviceI = new Intent(getActivity(), MyService.class);
@@ -140,10 +141,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
 
-        userLocationData.addListenerForSingleValueEvent(new ValueEventListener() {
+        userLocationData.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-
+                googleMap.clear();
 
                 for (DataSnapshot lastlocation : snapshot.getChildren()){
                     String UID = lastlocation.getKey();
@@ -152,10 +153,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
                     double longitude = lastlocation.child("longitude").getValue(Double.class);
 
                     LatLng latLng = new LatLng(latitude, longitude);
-                   if (latitude != 0 && longitude != 0){
-                       MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(username);
-                       googleMap.addMarker(markerOptions);
-                   }
+                    if (latitude != 0 && longitude != 0){
+                        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(username);
+                        googleMap.addMarker(markerOptions);
+                    }
                 }
             }
 
@@ -176,7 +177,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
         LocationRequest locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(500)
-                .setFastestInterval(1000);
+                .setFastestInterval(100);
 
 
         locationCallback = new LocationCallback() {
@@ -238,6 +239,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
         sensorManager.unregisterListener(this);
     }
 
+    public interface OnFallDetectionListener{
+        void onFallDetected();
+    }
+    public void setOnFallDetectionListener(OnFallDetectionListener listener){
+        this.fallDetectionListener = listener;
+    }
     public void onSensorChanged(SensorEvent event) {
         double Ax = Math.abs(event.values[0]);
         double Ay = Math.abs(event.values[1]);
@@ -245,36 +252,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
 
         double gravityRes = calculateSVM(Ax, Ay, Az);
 
-            if (gravityRes > 20.6) {
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                if (user != null) {
-                    String userId = user.getUid();
-                    DatabaseReference userRole = FirebaseDatabase.getInstance().getReference("users").child(userId).child("role");
-                    userRole.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (snapshot.exists()) {
-                                String role = snapshot.getValue(String.class);
-                                if (role != null && role.equals("Staff")) {
-                                    searchbutton.setVisibility(View.VISIBLE);
-                                    searchbutton.setEnabled(true);
-                                    searchbutton.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            getCurrentLocation();
-                                        }
-                                    });
-                                    Toast.makeText(requireContext(), "Anggota Terjatuh", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            // Handle the error if needed
-                        }
-                    });
-                }
+        if (gravityRes > 20.6) {
+            if (fallDetectionListener != null){
+                fallDetectionListener.onFallDetected();
+            }
         }
     }
 
@@ -331,33 +312,33 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Sensor
                     placesClient.findCurrentPlace(request).addOnSuccessListener(findCurrentPlaceResponse -> {
                         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
-                                    placesClient.findCurrentPlace(request).addOnSuccessListener(response -> {
-                                        FindCurrentPlaceResponse currentPlaceResponse = response;
-                                        List<PlaceLikelihood> placeLikelihoods = currentPlaceResponse.getPlaceLikelihoods();
+                                placesClient.findCurrentPlace(request).addOnSuccessListener(response -> {
+                                    FindCurrentPlaceResponse currentPlaceResponse = response;
+                                    List<PlaceLikelihood> placeLikelihoods = currentPlaceResponse.getPlaceLikelihoods();
 
-                                        if (!placeLikelihoods.isEmpty()) {
-                                            PlaceLikelihood likelihood = placeLikelihoods.get(0);
-                                            Place currentPlace = likelihood.getPlace();
+                                    if (!placeLikelihoods.isEmpty()) {
+                                        PlaceLikelihood likelihood = placeLikelihoods.get(0);
+                                        Place currentPlace = likelihood.getPlace();
 
-                                            String placeName = currentPlace.getName();
-                                            String placeAddress = currentPlace.getAddress();
-                                            LatLng placeLocation = currentPlace.getLatLng();
+                                        String placeName = currentPlace.getName();
+                                        String placeAddress = currentPlace.getAddress();
+                                        LatLng placeLocation = currentPlace.getLatLng();
 
-                                            Toast.makeText(requireContext(), "Tempat pengobatan terdekat: " + placeName + ", " + placeAddress, Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(requireContext(), "Tempat pengobatan terdekat: " + placeName + ", " + placeAddress, Toast.LENGTH_SHORT).show();
 
-                                            map.addMarker(new MarkerOptions()
-                                                    .position(placeLocation)
-                                                    .title(placeName)
-                                                    .snippet(placeAddress));
-                                        } else {
-                                            Toast.makeText(requireContext(), "Tidak ada tempat pengobatan ditemukan.", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }).addOnFailureListener(e -> {
-                                        if (e instanceof ApiException) {
-                                            ApiException apiException = (ApiException) e;
-                                            int statusCode = apiException.getStatusCode();
-                                        }
-                                    });
+                                        map.addMarker(new MarkerOptions()
+                                                .position(placeLocation)
+                                                .title(placeName)
+                                                .snippet(placeAddress));
+                                    } else {
+                                        Toast.makeText(requireContext(), "Tidak ada tempat pengobatan ditemukan.", Toast.LENGTH_SHORT).show();
+                                    }
+                                }).addOnFailureListener(e -> {
+                                    if (e instanceof ApiException) {
+                                        ApiException apiException = (ApiException) e;
+                                        int statusCode = apiException.getStatusCode();
+                                    }
+                                });
                             });
                         }
 

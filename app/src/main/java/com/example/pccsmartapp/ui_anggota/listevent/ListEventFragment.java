@@ -1,8 +1,6 @@
-package com.example.pccsmartapp.ui.listevent;
-
+package com.example.pccsmartapp.ui_anggota.listevent;
 
 import android.graphics.Color;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,7 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.pccsmartapp.R;
 import com.example.pccsmartapp.databinding.FragmentListEventBinding;
-import com.google.android.gms.common.api.ApiException;
+import com.example.pccsmartapp.ui_staff.listevent.ListEventViewModel;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -33,18 +31,8 @@ import com.google.maps.GeoApiContext;
 import com.google.maps.PendingResult;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.ElevationResult;
-import com.google.maps.model.EncodedPolyline;
 import com.google.maps.model.TravelMode;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,7 +75,7 @@ public class ListEventFragment extends Fragment implements OnMapReadyCallback {
         return root;
     }
     private void processDirections(String startLocation, String destinationLocation) {
-        DirectionsTask directionsTask = new DirectionsTask();
+        com.example.pccsmartapp.ui_anggota.listevent.ListEventFragment.DirectionsTask directionsTask = new com.example.pccsmartapp.ui_anggota.listevent.ListEventFragment.DirectionsTask();
         directionsTask.execute(startLocation, destinationLocation);
     }
 

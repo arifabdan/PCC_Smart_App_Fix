@@ -21,6 +21,9 @@
         android:theme="@style/Theme.PCCSmartApp"
         tools:targetApi="31">
         <activity
+            android:name=".LihatAnggota"
+            android:exported="false" />
+        <activity
             android:name=".LoginAdmin"
             android:exported="false" />
         <activity

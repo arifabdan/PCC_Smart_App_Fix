@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.pccsmartapp.databinding.FragmentListAnggota2Binding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -56,7 +57,7 @@ public class Registrasi extends AppCompatActivity {
         kembalibtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(Registrasi.this, LoginOrRegis.class);
+                Intent i = new Intent(Registrasi.this, FragmentListAnggota2Binding.class);
                 startActivity(i);
             }
         });

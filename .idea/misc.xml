@@ -4,12 +4,13 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/drawable/ic_launcher_background.xml" value="0.192" />
+        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/drawable/ic_profile.xml" value="0.325" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/drawable/registrasi_icon.xml" value="0.27" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_home.xml" value="0.18385416666666668" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_home1.xml" value="0.184375" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_home_2.xml" value="0.18385416666666668" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_home_anggota.xml" value="0.2682291666666667" />
-        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_lihat_anggota.xml" value="0.3692708333333333" />
+        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_lihat_anggota.xml" value="0.18" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_login.xml" value="0.16979166666666667" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_login_admin.xml" value="0.3692708333333333" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_login_or_regis.xml" value="0.18" />
@@ -20,11 +21,13 @@
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_home1.xml" value="0.223731884057971" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_home2.xml" value="0.1828125" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_list_anggota.xml" value="0.18385416666666668" />
+        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_list_anggota2.xml" value="0.27355072463768115" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_list_anggota_2.xml" value="0.1828125" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_list_event.xml" value="0.18385416666666668" />
+        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_list_event1.xml" value="0.18385416666666668" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_list_event_2.xml" value="0.18385416666666668" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_notifications.xml" value="0.3692708333333333" />
-        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_profile.xml" value="0.18385416666666668" />
+        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_profile.xml" value="0.5" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_registrasi.xml" value="0.3692708333333333" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/item_anggota.xml" value="0.36822916666666666" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/menu/bottom_nav_menu.xml" value="0.18385416666666668" />

@@ -34,16 +34,13 @@ public class HomeActivityStaff extends AppCompatActivity {
         HomeFragmentStaff fragmentStaff = new HomeFragmentStaff();
         HomeFragmentAnggota fragmentAnggota = new HomeFragmentAnggota();
 
-        fragmentAnggota.setOnFallDetectionListener(fragmentStaff);
-        getSupportFragmentManager().beginTransaction().replace(R.id.nav_host_fragment_activity_home, fragmentAnggota).commit();
 
         binding = inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
 
         BottomNavigationView navView = findViewById(R.id.nav_view_1);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
+
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.navigation_home, R.id.navigation_list_anggota, R.id.navigation_list_event)
                 .build();

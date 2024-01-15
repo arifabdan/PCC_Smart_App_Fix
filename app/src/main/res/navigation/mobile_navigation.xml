@@ -15,12 +15,12 @@
         android:id="@+id/navigation_list_anggota"
         android:name="com.example.pccsmartapp.ui_staff.listanggota.ListAnggotaFragment"
         android:label="List Anggota"
-        tools:layout="@layout/fragment_list_anggota" />
+        tools:layout="@layout/fragment_list_anggota2" />
 
     <fragment
         android:id="@+id/navigation_list_event"
         android:name="com.example.pccsmartapp.ui_staff.listevent.ListEventFragment"
         android:label="List Event"
-        tools:layout="@layout/fragment_list_event" />
+        tools:layout="@layout/fragment_list_event1" />
 
 </navigation>

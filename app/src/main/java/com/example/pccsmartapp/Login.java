@@ -89,32 +89,6 @@ public class Login extends AppCompatActivity {
                 });
             }
         });
-        checkSession();
-    }
-
-    private void saveSession(boolean isLoggedIn, String role) {
-        SharedPreferences.Editor editor = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE).edit();
-        editor.putBoolean("isLoggedIn", isLoggedIn);
-        editor.putString("role", role);
-        editor.apply();
-    }
-
-    private void checkSession() {
-        SharedPreferences prefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
-        boolean isLoggedIn = prefs.getBoolean("isLoggedIn", false);
-
-        if (isLoggedIn) {
-            String role = prefs.getString("role", "");
-            if (role.equals("Staff")) {
-                Intent staffIntent = new Intent(Login.this, HomeActivityStaff.class);
-                startActivity(staffIntent);
-                finish();
-            } else if (role.equals("Anggota")) {
-                Intent anggotaIntent = new Intent(Login.this, HomeActivityAnggota.class);
-                startActivity(anggotaIntent);
-                finish();
-            }
-        }
     }
 
 }

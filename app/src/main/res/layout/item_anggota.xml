@@ -12,22 +12,4 @@
         android:layout_height="wrap_content"
         android:text="Nama: " />
 
-    <TextView
-        android:id="@+id/umurTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Umur: " />
-
-    <TextView
-        android:id="@+id/alamatTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Alamat: " />
-
-    <TextView
-        android:id="@+id/emailTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Email: " />
-
 </LinearLayout>

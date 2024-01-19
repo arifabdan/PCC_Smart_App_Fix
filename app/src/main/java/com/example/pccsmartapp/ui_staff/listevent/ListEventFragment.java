@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.pccsmartapp.R;
+import com.example.pccsmartapp.databinding.FragmentListEvent1Binding;
 import com.example.pccsmartapp.databinding.FragmentListEventBinding;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,7 +39,7 @@ import java.util.List;
 
 public class ListEventFragment extends Fragment implements OnMapReadyCallback {
 
-    private FragmentListEventBinding binding;
+    private FragmentListEvent1Binding binding;
     private GoogleMap mMap;
     private Polyline currentPolyline;
     private EditText editTextStart;
@@ -51,7 +52,7 @@ public class ListEventFragment extends Fragment implements OnMapReadyCallback {
         ListEventViewModel listEventViewModel =
                 new ViewModelProvider(this).get(ListEventViewModel.class);
 
-        binding = FragmentListEventBinding.inflate(inflater, container, false);
+        binding = FragmentListEvent1Binding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapsevent);

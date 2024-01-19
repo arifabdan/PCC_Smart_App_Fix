@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui_staff.listevent.ListEventFragment">
+    tools:context=".ui_anggota.listevent.ListEventFragment">
 
     <fragment
         android:id="@+id/mapsevent"

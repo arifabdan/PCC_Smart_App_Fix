@@ -18,8 +18,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.pccsmartapp.MyService;
-import com.example.pccsmartapp.R;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -50,7 +48,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.Arrays;
 import java.util.List;
 
-public class LihatAnggota extends AppCompatActivity implements OnMapReadyCallback {
+public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 1;
     private SensorManager sensorManager;
@@ -230,7 +228,7 @@ public class LihatAnggota extends AppCompatActivity implements OnMapReadyCallbac
 
                     FindCurrentPlaceRequest request = FindCurrentPlaceRequest.newInstance(placeFields);
                     placesClient.findCurrentPlace(request).addOnSuccessListener(findCurrentPlaceResponse -> {
-                        if (ContextCompat.checkSelfPermission(LihatAnggota.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        if (ContextCompat.checkSelfPermission(LihatAnggota1.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
                                 placesClient.findCurrentPlace(request).addOnSuccessListener(response -> {
                                     FindCurrentPlaceResponse currentPlaceResponse = response;
@@ -244,14 +242,14 @@ public class LihatAnggota extends AppCompatActivity implements OnMapReadyCallbac
                                         String placeAddress = currentPlace.getAddress();
                                         LatLng placeLocation = currentPlace.getLatLng();
 
-                                        Toast.makeText(LihatAnggota.this, "Tempat pengobatan terdekat: " + placeName + ", " + placeAddress, Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(LihatAnggota1.this, "Tempat pengobatan terdekat: " + placeName + ", " + placeAddress, Toast.LENGTH_SHORT).show();
 
                                         map.addMarker(new MarkerOptions()
                                                 .position(placeLocation)
                                                 .title(placeName)
                                                 .snippet(placeAddress));
                                     } else {
-                                        Toast.makeText(LihatAnggota.this, "Tidak ada tempat pengobatan ditemukan.", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(LihatAnggota1.this, "Tidak ada tempat pengobatan ditemukan.", Toast.LENGTH_SHORT).show();
                                     }
                                 }).addOnFailureListener(e -> {
                                     if (e instanceof ApiException) {

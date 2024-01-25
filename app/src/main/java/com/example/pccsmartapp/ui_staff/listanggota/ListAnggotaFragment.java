@@ -11,16 +11,22 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.pccsmartapp.AnggotaAdapter;
 import com.example.pccsmartapp.R;
 import com.example.pccsmartapp.Registrasi;
+import com.example.pccsmartapp.User;
 import com.example.pccsmartapp.databinding.FragmentListAnggota2Binding;
-import com.example.pccsmartapp.databinding.FragmentListAnggotaBinding;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class ListAnggotaFragment extends Fragment {
 
     private FragmentListAnggota2Binding binding;
     private Button tambahanggota;
+    private AnggotaAdapter anggotaAdapter;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -38,7 +44,34 @@ public class ListAnggotaFragment extends Fragment {
                 startActivity(intent);
             }
         });
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        RecyclerView recyclerView = root.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        // Setup FirebaseRecyclerOptions
+        FirebaseRecyclerOptions<User> options =
+                new FirebaseRecyclerOptions.Builder<User>()
+                        .setQuery(database.getReference("users"), User.class)
+                        .build();
+
+        // Initialize MemberAdapter
+        anggotaAdapter = new AnggotaAdapter(options);
+        recyclerView.setAdapter(anggotaAdapter);
+
         return root;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        anggotaAdapter.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        anggotaAdapter.stopListening();
     }
 
     @Override

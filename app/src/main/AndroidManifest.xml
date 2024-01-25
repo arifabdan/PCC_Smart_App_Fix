@@ -21,10 +21,13 @@
         android:theme="@style/Theme.PCCSmartApp"
         tools:targetApi="31" >
         <activity
+            android:name=".LihatAnggota2"
+            android:exported="false" />
+        <activity
             android:name=".TambahEvent"
             android:exported="false" />
         <activity
-            android:name=".LihatAnggota"
+            android:name=".LihatAnggota1"
             android:exported="false" />
         <activity
             android:name=".HomeActivityAnggota"

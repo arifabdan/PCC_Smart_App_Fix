@@ -10,13 +10,6 @@
         android:name="com.example.pccsmartapp.ui_anggota.home.HomeFragmentAnggota"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home1" />
-
-    <fragment
-        android:id="@+id/navigation_list_anggota"
-        android:name="com.example.pccsmartapp.ui_anggota.listanggota.ListAnggotaFragment"
-        android:label="List Anggota"
-        tools:layout="@layout/fragment_list_anggota" />
-
     <fragment
         android:id="@+id/navigation_list_event"
         android:name="com.example.pccsmartapp.ui_anggota.listevent.ListEventFragment"

@@ -43,7 +43,7 @@
             android:layout_height="75dp"
             android:backgroundTint="@color/white"
             android:fontFamily="@font/poppins"
-            android:text="Login Anggota"
+            android:text="Login"
             android:textColor="@color/black"
             android:textSize="15dp" />
 

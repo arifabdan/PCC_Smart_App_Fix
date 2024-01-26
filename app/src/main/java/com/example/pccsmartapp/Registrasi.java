@@ -98,8 +98,6 @@ public class Registrasi extends AppCompatActivity {
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
                                     Toast.makeText(Registrasi.this, "Registrasi Berhasil", Toast.LENGTH_SHORT).show();
-                                    Intent i = new Intent(Registrasi.this, Login.class);
-                                    startActivity(i);
                                 } else {
                                     Toast.makeText(Registrasi.this, "Registrasi Gagal", Toast.LENGTH_SHORT).show();
                                 }

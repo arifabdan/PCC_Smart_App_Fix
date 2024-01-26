@@ -6,6 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".ui_anggota.profile.ProfileFragment">
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
         <Button
             android:id="@+id/tambahanggota"
             android:layout_width="50dp"

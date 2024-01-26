@@ -14,7 +14,7 @@
         android:padding="16dp" />
 
     <Button
-        android:id="@+id/tambahanggota"
+        android:id="@+id/tambahevent"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:background="@drawable/roundbutton"

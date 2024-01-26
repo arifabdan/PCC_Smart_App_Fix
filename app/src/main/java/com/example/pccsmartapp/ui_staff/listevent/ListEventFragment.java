@@ -1,6 +1,7 @@
 package com.example.pccsmartapp.ui_staff.listevent;
 
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,6 +16,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.pccsmartapp.R;
+import com.example.pccsmartapp.Registrasi;
+import com.example.pccsmartapp.TambahEvent;
 import com.example.pccsmartapp.databinding.FragmentListEvent1Binding;
 import com.example.pccsmartapp.databinding.FragmentListEventBinding;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -40,11 +43,8 @@ import java.util.List;
 public class ListEventFragment extends Fragment{
 
     private FragmentListEvent1Binding binding;
-    private GoogleMap mMap;
-    private Polyline currentPolyline;
-    private EditText editTextStart;
-    private EditText editTextDestination;
-    private Button buttonSearch;
+    private Button tambahEvent;
+
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -54,6 +54,15 @@ public class ListEventFragment extends Fragment{
 
         binding = FragmentListEvent1Binding.inflate(inflater, container, false);
         View root = binding.getRoot();
+
+        tambahEvent = root.findViewById(R.id.tambahevent);
+        tambahEvent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), TambahEvent.class);
+                startActivity(intent);
+            }
+        });
 
 
         return root;

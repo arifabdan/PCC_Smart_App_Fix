@@ -25,16 +25,16 @@
                 android:hint="Nama Event"/>
 
             <EditText
-                android:id="@+id/titikawal"
+                android:id="@+id/Start"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Masukkan Titik Awal"/>
+                android:hint="Start"/>
 
             <EditText
                 android:id="@+id/tujuan"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Tujuan"/>
+                android:hint="Finish"/>
 
             <fragment
                 android:id="@+id/mapsevent"
@@ -60,9 +60,10 @@
 
             <Button
                 android:id="@+id/simpanevent"
-                android:layout_width="100dp"
+                android:layout_width="170dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:backgroundTint="@color/black"
                 android:text="Tambah Event"/>
         </LinearLayout>
 

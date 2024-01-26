@@ -52,7 +52,7 @@ public class ListAnggotaFragment extends Fragment {
         // Setup FirebaseRecyclerOptions
         FirebaseRecyclerOptions<User> options =
                 new FirebaseRecyclerOptions.Builder<User>()
-                        .setQuery(database.getReference("users"), User.class)
+                        .setQuery(database.getReference("users").orderByChild("username"), User.class)
                         .build();
 
         // Initialize MemberAdapter

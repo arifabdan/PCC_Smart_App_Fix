@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.pccsmartapp.LihatAnggota1;
+import com.example.pccsmartapp.LihatAnggota2;
 import com.example.pccsmartapp.MyService;
 
 
@@ -41,7 +42,7 @@ public class HomeFragmentStaff extends Fragment {
         lihatanggota.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), LihatAnggota1.class);
+                Intent intent = new Intent(getActivity(), LihatAnggota2.class);
                 startActivity(intent);
             }
         });

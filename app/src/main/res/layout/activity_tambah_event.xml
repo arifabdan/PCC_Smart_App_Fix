@@ -1,9 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".TambahEvent">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/inputlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="10dp"
+            android:padding="16dp">
+
+            <EditText
+                android:id="@+id/namaevent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nama Event"/>
+
+            <EditText
+                android:id="@+id/titikawal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Masukkan Titik Awal"/>
+
+            <EditText
+                android:id="@+id/tujuan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Tujuan"/>
+
+            <fragment
+                android:id="@+id/mapsevent"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="200dp" />
+
+            <EditText
+                android:id="@+id/deskripsi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Deskripsi Event"
+                android:inputType="textMultiLine"
+                android:lines="5" />
+
+            <DatePicker
+                android:id="@+id/tanggalPicker"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:calendarViewShown="false"
+                android:datePickerMode="spinner"
+                android:layout_marginTop="10dp"/>
+
+            <Button
+                android:id="@+id/simpanevent"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Tambah Event"/>
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>

@@ -59,7 +59,6 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
     private DatabaseReference userLocationData;
     private LocationCallback locationCallback;
     private Marker userMarker;
-    private Button searchbutton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +76,6 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
-        searchbutton = findViewById(R.id.caribtn);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.maps);
         if (mapFragment != null) {
@@ -85,12 +83,6 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
         }
         userLocationData = FirebaseDatabase.getInstance().getReference("User_Location");
 
-        searchbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Handle the search button click
-            }
-        });
     }
 
     @Override
@@ -190,11 +182,6 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
     private void getCurrentLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, location -> {
-                if (location != null) {
-                    findNearestHospital();
-                } else {
-                    Toast.makeText(this, "Lokasi tidak tersedia.", Toast.LENGTH_SHORT).show();
-                }
             });
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
@@ -205,69 +192,6 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
         map.addMarker(new MarkerOptions()
                 .position(latLng)
                 .title(username));
-    }
-
-    @SuppressLint("MissingPermission")
-    private void findNearestHospital() {
-        List<Place.Field> placeFields = Arrays.asList(
-                Place.Field.NAME,
-                Place.Field.ADDRESS,
-                Place.Field.TYPES
-        );
-
-        FirebaseDatabase.getInstance().getReference("Users_Location").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    DataSnapshot lastlocation = snapshot.getChildren().iterator().next();
-                    double latitude = lastlocation.child("latitude").getValue(Double.class);
-                    double longitude = lastlocation.child("longitude").getValue(Double.class);
-
-                    LatLng latLng = new LatLng(latitude, longitude);
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-
-                    FindCurrentPlaceRequest request = FindCurrentPlaceRequest.newInstance(placeFields);
-                    placesClient.findCurrentPlace(request).addOnSuccessListener(findCurrentPlaceResponse -> {
-                        if (ContextCompat.checkSelfPermission(LihatAnggota1.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
-                                placesClient.findCurrentPlace(request).addOnSuccessListener(response -> {
-                                    FindCurrentPlaceResponse currentPlaceResponse = response;
-                                    List<PlaceLikelihood> placeLikelihoods = currentPlaceResponse.getPlaceLikelihoods();
-
-                                    if (!placeLikelihoods.isEmpty()) {
-                                        PlaceLikelihood likelihood = placeLikelihoods.get(0);
-                                        Place currentPlace = likelihood.getPlace();
-
-                                        String placeName = currentPlace.getName();
-                                        String placeAddress = currentPlace.getAddress();
-                                        LatLng placeLocation = currentPlace.getLatLng();
-
-                                        Toast.makeText(LihatAnggota1.this, "Tempat pengobatan terdekat: " + placeName + ", " + placeAddress, Toast.LENGTH_SHORT).show();
-
-                                        map.addMarker(new MarkerOptions()
-                                                .position(placeLocation)
-                                                .title(placeName)
-                                                .snippet(placeAddress));
-                                    } else {
-                                        Toast.makeText(LihatAnggota1.this, "Tidak ada tempat pengobatan ditemukan.", Toast.LENGTH_SHORT).show();
-                                    }
-                                }).addOnFailureListener(e -> {
-                                    if (e instanceof ApiException) {
-                                        ApiException apiException = (ApiException) e;
-                                        int statusCode = apiException.getStatusCode();
-                                    }
-                                });
-                            });
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 
     @Override

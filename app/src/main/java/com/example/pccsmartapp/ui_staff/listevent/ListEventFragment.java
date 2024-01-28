@@ -14,12 +14,19 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.pccsmartapp.AnggotaAdapter;
+import com.example.pccsmartapp.Event;
+import com.example.pccsmartapp.EventAdapter;
 import com.example.pccsmartapp.R;
 import com.example.pccsmartapp.Registrasi;
 import com.example.pccsmartapp.TambahEvent;
+import com.example.pccsmartapp.User;
 import com.example.pccsmartapp.databinding.FragmentListEvent1Binding;
 import com.example.pccsmartapp.databinding.FragmentListEventBinding;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -28,6 +35,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.ElevationApi;
@@ -44,6 +52,7 @@ public class ListEventFragment extends Fragment{
 
     private FragmentListEvent1Binding binding;
     private Button tambahEvent;
+    private EventAdapter eventAdapter;
 
 
 
@@ -64,13 +73,40 @@ public class ListEventFragment extends Fragment{
             }
         });
 
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        RecyclerView recyclerView = root.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        // Setup FirebaseRecyclerOptions
+        FirebaseRecyclerOptions<Event> options =
+                new FirebaseRecyclerOptions.Builder<Event>()
+                        .setQuery(database.getReference("Event").orderByChild("eventDate"), Event.class)
+                        .build();
+
+        // Initialize MemberAdapter
+        eventAdapter = new EventAdapter(options);
+        recyclerView.setAdapter(eventAdapter);
+
 
         return root;
     }
+
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
     }
+    @Override
+    public void onStart() {
+        super.onStart();
+        eventAdapter.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        eventAdapter.stopListening();
+    }
+
 }

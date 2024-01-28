@@ -46,6 +46,7 @@ public class ListEventFragment extends Fragment implements OnMapReadyCallback {
     private Button buttonSearch;
 
 
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         ListEventViewModel listEventViewModel =

@@ -1,14 +1,21 @@
 package com.example.pccsmartapp;
 
+import static android.content.ContentValues.TAG;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -16,6 +23,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.common.api.ApiException;
@@ -28,9 +37,13 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.PlaceLikelihood;
@@ -45,6 +58,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Arrays;
 import java.util.List;
@@ -60,6 +74,7 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
     private DatabaseReference userLocationData;
     private LocationCallback locationCallback;
     private Marker userMarker;
+    private double THRESHOLD_FALL = 20.6;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +99,30 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
             mapFragment.getMapAsync(this);
         }
         userLocationData = FirebaseDatabase.getInstance().getReference("User_Location");
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
 
+                        String token = task.getResult();
+                        Log.d(TAG, token);
+                    }
+                });
+
+    }
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+
+            double acceleration = Math.sqrt(x * x + y * y + z * z);
+
+        }
     }
 
     @Override
@@ -104,7 +142,8 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
 
                     LatLng latLng = new LatLng(latitude, longitude);
                     if (latitude != 0 && longitude != 0) {
-                        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(username);
+                        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.sepeda);
+                        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(username).icon(BitmapDescriptorFactory.fromBitmap(bitmap));
                         googleMap.addMarker(markerOptions);
                     }
                 }
@@ -143,17 +182,21 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 if (snapshot.exists()) {
-                                    String username = snapshot.child("username").getValue(String.class);
-                                    if (username != null) {
-                                        userLocationData.child("username").setValue(username);
-                                        userLocationData.child("latitude").setValue(location.getLatitude());
-                                        userLocationData.child("longitude").setValue(location.getLongitude());
-                                        if (userMarker == null) {
-                                            userMarker = map.addMarker(new MarkerOptions()
-                                                    .position(new LatLng(location.getLatitude(), location.getLongitude()))
-                                                    .title(username));
-                                        } else {
-                                            userMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+                                    String userRole = snapshot.child("role").getValue(String.class);
+                                    // Menambahkan kondisi untuk membatasi pengambilan data lokasi hanya untuk anggota
+                                    if ("Anggota".equals(userRole)) {
+                                        String username = snapshot.child("username").getValue(String.class);
+                                        if (username != null) {
+                                            userLocationData.child("username").setValue(username);
+                                            userLocationData.child("latitude").setValue(location.getLatitude());
+                                            userLocationData.child("longitude").setValue(location.getLongitude());
+                                            if (userMarker == null) {
+                                                userMarker = map.addMarker(new MarkerOptions()
+                                                        .position(new LatLng(location.getLatitude(), location.getLongitude()))
+                                                        .title(username));
+                                            } else {
+                                                userMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+                                            }
                                         }
                                     }
                                 }
@@ -177,9 +220,7 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
         }
     }
 
-    public void onFallDetected() {
-        Toast.makeText(this, "Anggota Terjatuh.", Toast.LENGTH_SHORT).show();
-    }
+
 
     private void getCurrentLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -206,6 +247,11 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
                 Toast.makeText(this, "Izin akses lokasi ditolak.", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    protected void onResume() {
+        super.onResume();
+        reqLocationUpdates();
     }
 
     @Override

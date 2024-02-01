@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
@@ -14,7 +15,7 @@
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_lihat_anggota2.xml" value="0.3692708333333333" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_login.xml" value="0.16979166666666667" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_login_admin.xml" value="0.3692708333333333" />
-        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_login_or_regis.xml" value="0.5" />
+        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_login_or_regis.xml" value="0.22" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_registrasi.xml" value="0.18385416666666668" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_tambah_event.xml" value="0.184375" />

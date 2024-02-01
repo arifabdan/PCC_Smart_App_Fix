@@ -2,10 +2,14 @@ package com.example.pccsmartapp;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -16,6 +20,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.common.api.ApiException;
@@ -28,6 +34,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -60,12 +68,12 @@ public class LihatAnggota2 extends AppCompatActivity implements OnMapReadyCallba
     private DatabaseReference userLocationData;
     private LocationCallback locationCallback;
     private Marker userMarker;
-    private Button searchbutton;
+    private double THRESHOLD_FALL = 20.6;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_lihat_anggota2);
+        setContentView(R.layout.activity_lihat_anggota);
 
         FirebaseApp.initializeApp(this);
         Intent serviceI = new Intent(this, MyService.class);
@@ -79,7 +87,6 @@ public class LihatAnggota2 extends AppCompatActivity implements OnMapReadyCallba
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
-        searchbutton = findViewById(R.id.caribtn);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.maps);
         if (mapFragment != null) {
@@ -87,13 +94,42 @@ public class LihatAnggota2 extends AppCompatActivity implements OnMapReadyCallba
         }
         userLocationData = FirebaseDatabase.getInstance().getReference("User_Location");
 
-        searchbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Handle the search button click
-                findNearestHospital();
+    }
+
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+
+            double acceleration = Math.sqrt(x * x + y * y + z * z);
+
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null) {
+                String userId = user.getUid();
+                DatabaseReference userData = FirebaseDatabase.getInstance().getReference("users").child(userId);
+
+                userData.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            String userRole = snapshot.child("role").getValue(String.class);
+
+                            // Cek apakah pengguna adalah "anggota" dan percepatan di bawah ambang batas
+                            if ("Anggota".equals(userRole) && acceleration < THRESHOLD_FALL) {
+                                // Jatuh terdeteksi untuk anggota, lakukan sesuatu (misalnya, kirim notifikasi ke staff)
+                                sendNotificationToStaff();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Handle error
+                    }
+                });
             }
-        });
+        }
     }
 
     @Override
@@ -113,7 +149,8 @@ public class LihatAnggota2 extends AppCompatActivity implements OnMapReadyCallba
 
                     LatLng latLng = new LatLng(latitude, longitude);
                     if (latitude != 0 && longitude != 0) {
-                        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(username);
+                        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.sepeda);
+                        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(username).icon(BitmapDescriptorFactory.fromBitmap(bitmap));
                         googleMap.addMarker(markerOptions);
                     }
                 }
@@ -152,17 +189,21 @@ public class LihatAnggota2 extends AppCompatActivity implements OnMapReadyCallba
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 if (snapshot.exists()) {
-                                    String username = snapshot.child("username").getValue(String.class);
-                                    if (username != null) {
-                                        userLocationData.child("username").setValue(username);
-                                        userLocationData.child("latitude").setValue(location.getLatitude());
-                                        userLocationData.child("longitude").setValue(location.getLongitude());
-                                        if (userMarker == null) {
-                                            userMarker = map.addMarker(new MarkerOptions()
-                                                    .position(new LatLng(location.getLatitude(), location.getLongitude()))
-                                                    .title(username));
-                                        } else {
-                                            userMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+                                    String userRole = snapshot.child("role").getValue(String.class);
+                                    // Menambahkan kondisi untuk membatasi pengambilan data lokasi hanya untuk anggota
+                                    if ("Anggota".equals(userRole)) {
+                                        String username = snapshot.child("username").getValue(String.class);
+                                        if (username != null) {
+                                            userLocationData.child("username").setValue(username);
+                                            userLocationData.child("latitude").setValue(location.getLatitude());
+                                            userLocationData.child("longitude").setValue(location.getLongitude());
+                                            if (userMarker == null) {
+                                                userMarker = map.addMarker(new MarkerOptions()
+                                                        .position(new LatLng(location.getLatitude(), location.getLongitude()))
+                                                        .title(username));
+                                            } else {
+                                                userMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+                                            }
                                         }
                                     }
                                 }
@@ -186,18 +227,11 @@ public class LihatAnggota2 extends AppCompatActivity implements OnMapReadyCallba
         }
     }
 
-    public void onFallDetected() {
-        Toast.makeText(this, "Anggota Terjatuh.", Toast.LENGTH_SHORT).show();
-    }
+
 
     private void getCurrentLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, location -> {
-                if (location != null) {
-                    findNearestHospital();
-                } else {
-                    Toast.makeText(this, "Lokasi tidak tersedia.", Toast.LENGTH_SHORT).show();
-                }
             });
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
@@ -210,69 +244,6 @@ public class LihatAnggota2 extends AppCompatActivity implements OnMapReadyCallba
                 .title(username));
     }
 
-    @SuppressLint("MissingPermission")
-    private void findNearestHospital() {
-        List<Place.Field> placeFields = Arrays.asList(
-                Place.Field.NAME,
-                Place.Field.ADDRESS,
-                Place.Field.TYPES
-        );
-
-        FirebaseDatabase.getInstance().getReference("Users_Location").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    DataSnapshot lastlocation = snapshot.getChildren().iterator().next();
-                    double latitude = lastlocation.child("latitude").getValue(Double.class);
-                    double longitude = lastlocation.child("longitude").getValue(Double.class);
-
-                    LatLng latLng = new LatLng(latitude, longitude);
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-
-                    FindCurrentPlaceRequest request = FindCurrentPlaceRequest.newInstance(placeFields);
-                    placesClient.findCurrentPlace(request).addOnSuccessListener(findCurrentPlaceResponse -> {
-                        if (ContextCompat.checkSelfPermission(LihatAnggota2.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
-                                placesClient.findCurrentPlace(request).addOnSuccessListener(response -> {
-                                    FindCurrentPlaceResponse currentPlaceResponse = response;
-                                    List<PlaceLikelihood> placeLikelihoods = currentPlaceResponse.getPlaceLikelihoods();
-
-                                    if (!placeLikelihoods.isEmpty()) {
-                                        PlaceLikelihood likelihood = placeLikelihoods.get(0);
-                                        Place currentPlace = likelihood.getPlace();
-
-                                        String placeName = currentPlace.getName();
-                                        String placeAddress = currentPlace.getAddress();
-                                        LatLng placeLocation = currentPlace.getLatLng();
-
-                                        Toast.makeText(LihatAnggota2.this, "Tempat pengobatan terdekat: " + placeName + ", " + placeAddress, Toast.LENGTH_SHORT).show();
-
-                                        map.addMarker(new MarkerOptions()
-                                                .position(placeLocation)
-                                                .title(placeName)
-                                                .snippet(placeAddress));
-                                    } else {
-                                        Toast.makeText(LihatAnggota2.this, "Tidak ada tempat pengobatan ditemukan.", Toast.LENGTH_SHORT).show();
-                                    }
-                                }).addOnFailureListener(e -> {
-                                    if (e instanceof ApiException) {
-                                        ApiException apiException = (ApiException) e;
-                                        int statusCode = apiException.getStatusCode();
-                                    }
-                                });
-                            });
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -283,6 +254,33 @@ public class LihatAnggota2 extends AppCompatActivity implements OnMapReadyCallba
                 Toast.makeText(this, "Izin akses lokasi ditolak.", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void sendNotificationToStaff() {
+        // Buat Intent untuk membuka aktivitas tertentu ketika notifikasi diklik
+        Intent intent = new Intent(this, LihatAnggota1.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        // Bangun notifikasi
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "YourChannelId")
+                .setSmallIcon(R.drawable.ic_baseline_notification_important_24)
+                .setContentTitle("Anggota Terdeteksi Jatuh")
+                .setContentText("Notifikasi: Anggota terdeteksi jatuh!")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        // Dapatkan NotificationManager
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        // Tampilkan notifikasi
+        notificationManager.notify(123, builder.build());
+    }
+
+    protected void onResume() {
+        super.onResume();
+        reqLocationUpdates();
     }
 
     @Override

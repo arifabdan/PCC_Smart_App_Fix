@@ -72,7 +72,6 @@ public class ListEventFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
-
         return root;
     }
     private void processDirections(String startLocation, String destinationLocation) {

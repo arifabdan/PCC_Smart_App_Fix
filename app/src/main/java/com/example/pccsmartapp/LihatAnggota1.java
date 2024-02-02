@@ -82,7 +82,7 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
         setContentView(R.layout.activity_lihat_anggota);
 
         FirebaseApp.initializeApp(this);
-        Intent serviceI = new Intent(this, MyService.class);
+        Intent serviceI = new Intent(this, MessagingService.class);
         startService(serviceI);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);

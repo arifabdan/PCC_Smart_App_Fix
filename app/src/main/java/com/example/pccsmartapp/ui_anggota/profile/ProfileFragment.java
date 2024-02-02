@@ -1,8 +1,6 @@
 package com.example.pccsmartapp.ui_anggota.profile;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,13 +10,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.example.pccsmartapp.Login;
-import com.example.pccsmartapp.LoginOrRegis;
 import com.example.pccsmartapp.R;
 import com.example.pccsmartapp.User;
-import com.example.pccsmartapp.databinding.FragmentProfileBinding;
+import com.example.pccsmartapp.Preferences;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,10 +28,9 @@ public class ProfileFragment extends Fragment {
     private Button logoutbutton;
     private TextView nama, email, tahungabung;
 
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        ProfileViewModel profileViewModel =
-                new ViewModelProvider(this).get(ProfileViewModel.class);
 
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -44,26 +39,33 @@ public class ProfileFragment extends Fragment {
         email = root.findViewById(R.id.tvEmail);
         tahungabung = root.findViewById(R.id.tvTahunGabung);
 
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(uid);
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(uid);
 
-        userRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                User user = snapshot.getValue(User.class);
+            userRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    User user = snapshot.getValue(User.class);
 
-                if (user!=null){
-                    nama.setText("Nama: " + user.getUsername());
-                    email.setText("Email: " + user.getEmail());
-                    tahungabung.setText("Tahun Gabung: " + user.getTahunGabung());
+                    if (user != null) {
+                        nama.setText("Nama: " + user.getUsername());
+                        email.setText("Email: " + user.getEmail());
+                        tahungabung.setText("Tahun Gabung: " + user.getTahunGabung());
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
+                }
+            });
+        } else {
+            // Pengguna belum login, atur teks atau tindakan sesuai kebutuhan Anda
+            nama.setText("Anda belum login");
+            email.setText("");
+            tahungabung.setText("");
+        }
 
         logoutbutton = root.findViewById(R.id.logoutbtn);
 
@@ -74,22 +76,16 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-
         return root;
     }
     private void logoutUser() {
-        // Hapus informasi sesi login dari SharedPreferences
-        SharedPreferences.Editor editor = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE).edit();
-        editor.remove("isLoggedIn");
-        editor.remove("role");
-        editor.apply();
-
-        // Log out dari Firebase Authentication
         FirebaseAuth.getInstance().signOut();
 
-        // Buka kembali halaman login
+        Preferences preferences = new Preferences(requireContext());
+        preferences.setLogin(false);
+
         Intent intent = new Intent(requireActivity(), Login.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        requireActivity().finish();
     }
 }

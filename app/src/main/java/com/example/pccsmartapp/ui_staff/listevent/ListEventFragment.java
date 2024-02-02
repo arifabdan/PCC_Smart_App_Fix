@@ -58,8 +58,6 @@ public class ListEventFragment extends Fragment{
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        ListEventViewModel listEventViewModel =
-                new ViewModelProvider(this).get(ListEventViewModel.class);
 
         binding = FragmentListEvent1Binding.inflate(inflater, container, false);
         View root = binding.getRoot();

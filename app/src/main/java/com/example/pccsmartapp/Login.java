@@ -3,9 +3,7 @@ package com.example.pccsmartapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -36,6 +34,21 @@ public class Login extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         getSupportActionBar().hide();
 
+        Preferences preferences = new Preferences(this);
+
+        if (preferences.isLoggedIn()) {
+            String userRole = preferences.getUserRole();
+
+            // Start the appropriate activity based on the user's role
+            if (userRole.equals("Staff")) {
+                startActivity(new Intent(Login.this, HomeActivityStaff.class));
+            } else if (userRole.equals("Anggota")) {
+                startActivity(new Intent(Login.this, HomeActivityAnggota.class));
+            }
+
+            finish(); // Finish the current activity to prevent going back to login
+        }
+
         firebaseAuth = FirebaseAuth.getInstance();
         emailtxt = findViewById(R.id.emailEditText);
         passwordtxt = findViewById(R.id.passwordEditText);
@@ -45,7 +58,7 @@ public class Login extends AppCompatActivity {
         kembalibtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(Login.this, LoginOrRegis.class);
+                Intent i = new Intent(Login.this, PilihLogin.class);
                 startActivity(i);
             }
         });
@@ -67,6 +80,10 @@ public class Login extends AppCompatActivity {
                               @Override
                               public void onDataChange(@NonNull DataSnapshot snapshot) {
                                   String role = snapshot.child("role").getValue(String.class);
+
+                                  Preferences preferences = new Preferences(Login.this);
+                                  preferences.setLogin(true);
+                                  preferences.setUserRole(role);
 
                                   if (role.equals("Staff")){
                                       Intent staffIntent = new Intent(Login.this, HomeActivityStaff.class);

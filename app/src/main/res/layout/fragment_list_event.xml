@@ -6,39 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".ui_anggota.listevent.ListEventFragment">
 
-    <fragment
-        android:id="@+id/mapsevent"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/inputlayout"/>
-
-    <LinearLayout
-        android:id="@+id/inputlayout"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical"
-        android:layout_marginBottom="70dp"
-        android:padding="16dp">
-        <EditText
-            android:id="@+id/titikawal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Masukkan Titik Awal"/>
-
-        <EditText
-            android:id="@+id/tujuan"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Tujuan"/>
-
-        <Button
-            android:id="@+id/lihatrute"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Lihat Rute"/>
-    </LinearLayout>
+        android:clipToPadding="false"
+        android:padding="16dp" />
 
 
 </RelativeLayout>

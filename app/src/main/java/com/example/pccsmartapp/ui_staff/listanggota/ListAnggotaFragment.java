@@ -30,8 +30,6 @@ public class ListAnggotaFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        ListAnggotaViewModel listAnggotaViewModel =
-                new ViewModelProvider(this).get(ListAnggotaViewModel.class);
 
         binding = FragmentListAnggota2Binding.inflate(inflater, container, false);
         View root = binding.getRoot();

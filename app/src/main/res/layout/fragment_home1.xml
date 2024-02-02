@@ -60,13 +60,14 @@
        android:layout_marginTop="30dp"/>
 
    <!-- Image Spinner -->
-   <Spinner
-       android:id="@+id/imageSpinner"
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:layout_below="@id/menuButtons"
-       android:layout_marginTop="16dp">
-      <!-- Populate the spinner with images as needed -->
-   </Spinner>
+   <Button
+       android:id="@+id/button3"
+       android:layout_width="100dp"
+       android:layout_height="50dp"
+       android:layout_weight="1"
+       android:layout_marginRight="8dp"
+       android:text="Logout"
+       android:textSize="10dp"
+       android:layout_below="@+id/remindertxt"/>
 
 </RelativeLayout>

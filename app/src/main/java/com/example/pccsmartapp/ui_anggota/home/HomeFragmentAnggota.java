@@ -13,11 +13,12 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.pccsmartapp.LihatAnggota1;
+import com.example.pccsmartapp.MessagingService;
 import com.example.pccsmartapp.R;
 
 
+import com.example.pccsmartapp.TrackingJalur;
 import com.example.pccsmartapp.databinding.FragmentHomeBinding;
-import com.example.pccsmartapp.ui_staff.home.HomeViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -34,7 +35,7 @@ import java.util.Locale;
 public class HomeFragmentAnggota extends Fragment {
 
     private FragmentHomeBinding binding;
-    private Button lihatanggota;
+    private Button lihatanggota,tracking;
     private TextView remindertxt,greettxt;
 
     private FirebaseAuth firebaseAuth;
@@ -45,13 +46,11 @@ public class HomeFragmentAnggota extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        com.example.pccsmartapp.ui_staff.home.HomeViewModel homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        Intent serviceI = new Intent(getActivity(), MyService.class);
+        Intent serviceI = new Intent(getActivity(), MessagingService.class);
         getActivity().startService(serviceI);
 
         greettxt = root.findViewById(R.id.greetingstxt);
@@ -98,6 +97,15 @@ public class HomeFragmentAnggota extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), LihatAnggota1.class);
+                startActivity(intent);
+            }
+        });
+
+        tracking = root.findViewById(R.id.button2);
+        tracking.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), TrackingJalur.class);
                 startActivity(intent);
             }
         });

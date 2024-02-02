@@ -50,7 +50,6 @@
             android:hint="Password"
             android:inputType="textPassword"
             />
-
     </RelativeLayout>
 
     <RelativeLayout

@@ -2,55 +2,46 @@ package com.example.pccsmartapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 
 public class MainActivity extends AppCompatActivity {
-    Handler h = new Handler();
+    private static final int SPLASH_DURATION = 5000; // Durasi splash screen dalam milidetik
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
-        h.postDelayed(new Runnable() {
+
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 checkSessionAndNavigate();
             }
-        }, 5000);
+        }, SPLASH_DURATION);
     }
+
     private void checkSessionAndNavigate() {
-        SharedPreferences prefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
-        boolean isLoggedIn = prefs.getBoolean("isLoggedIn", false);
+        Preferences preferences = new Preferences(this);
 
-        if (isLoggedIn) {
-            // Pengguna sudah login, arahkan ke halaman beranda berdasarkan rolenya
-            String role = prefs.getString("role", "");
-            redirectToHome(role);
+        if (preferences.isLoggedIn()) {
+            String userRole = preferences.getUserRole();
+
+            // Start the appropriate activity based on the user's role
+            if (userRole.equals("Staff")) {
+                startActivity(new Intent(MainActivity.this, HomeActivityStaff.class));
+            } else if (userRole.equals("Anggota")) {
+                startActivity(new Intent(MainActivity.this, HomeActivityAnggota.class));
+            }
+
+            finish(); // Finish the current activity to prevent going back to login
         } else {
-            // Pengguna belum login, arahkan ke halaman login
-            Intent intent = new Intent(MainActivity.this, LoginOrRegis.class);
-            startActivity(intent);
-            finish();
+            // Jika tidak ada sesi, navigasikan ke aktivitas login atau aktivitas lainnya
+            startActivity(new Intent(MainActivity.this, Login.class));
+            finish(); // Finish the current activity after navigating to login
         }
-    }
-
-    private void redirectToHome(String role) {
-        Intent intent;
-        if (role.equals("Staff")) {
-            intent = new Intent(MainActivity.this, HomeActivityStaff.class);
-        } else if (role.equals("Anggota")) {
-            intent = new Intent(MainActivity.this, HomeActivityAnggota.class);
-        } else {
-            // Role tidak dikenali, arahkan ke halaman login
-            intent = new Intent(MainActivity.this, LoginOrRegis.class);
-        }
-
-        startActivity(intent);
-        finish();
     }
 }

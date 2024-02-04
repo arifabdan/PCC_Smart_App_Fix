@@ -1,0 +1,5 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#F0F0F0"/> <!-- Ganti dengan warna latar belakang yang diinginkan -->
+    <corners android:radius="8dp"/> <!-- Ganti dengan radius sudut yang diinginkan -->
+    <stroke android:color="#000000" android:width="1dp"/> <!-- Ganti dengan warna dan ketebalan border yang diinginkan -->
+</shape>

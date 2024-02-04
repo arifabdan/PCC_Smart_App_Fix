@@ -3,6 +3,7 @@ package com.example.pccsmartapp;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -10,9 +11,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class EventAdapter extends FirebaseRecyclerAdapter<Event, EventAdapter.EventViewHolder> {
-
+private Button Lihat,Edit,Delete;
     public EventAdapter(@NonNull FirebaseRecyclerOptions<Event> options) {
         super(options);
     }
@@ -29,6 +37,7 @@ public class EventAdapter extends FirebaseRecyclerAdapter<Event, EventAdapter.Ev
         // Create ViewHolder
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_event, parent, false);
         return new EventViewHolder(view);
+
     }
 
     // ViewHolder untuk menangani tampilan setiap item di RecyclerView
@@ -49,5 +58,6 @@ public class EventAdapter extends FirebaseRecyclerAdapter<Event, EventAdapter.Ev
             finishTxt.setText(event.getFinish());
             TanggalTxt.setText(event.getEventDate());
         }
+
     }
 }

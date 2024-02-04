@@ -6,25 +6,60 @@
     android:layout_height="match_parent"
     tools:context=".ui_anggota.profile.ProfileFragment">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="#F99417">
+
+    </RelativeLayout>
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="400dp"
+    android:backgroundTint="#d3d3d3"
+    android:layout_centerInParent="true"
+    android:background="@drawable/shape">
+
+    <TextView
+        android:id="@+id/informasi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="INFORMASI"
+        android:fontFamily="@font/poppins"
+        android:textColor="@color/black"
+        android:paddingLeft="10dp"
+        android:textSize="20dp"/>
     <TextView
         android:id="@+id/tvNama"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nama: " />
+        android:text="Nama: "
+        android:fontFamily="@font/poppins"
+        android:layout_below="@+id/informasi"
+        android:textColor="@color/black"
+        android:paddingLeft="10dp"/>
 
     <TextView
         android:id="@+id/tvEmail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Email: "
-        android:layout_below="@+id/tvNama"/>
+        android:fontFamily="@font/poppins"
+        android:layout_below="@+id/tvNama"
+        android:textColor="@color/black"
+        android:paddingLeft="10dp"/>
 
     <TextView
         android:id="@+id/tvTahunGabung"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Tahun Gabung: "
-        android:layout_below="@+id/tvEmail"/>
+        android:fontFamily="@font/poppins"
+        android:layout_below="@+id/tvEmail"
+        android:textColor="@color/black"
+        android:paddingLeft="10dp"/>
+
+</RelativeLayout>
+
     <Button
         android:id="@+id/logoutbtn"
         android:layout_width="100dp"
@@ -34,5 +69,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="80dp"
-        android:layout_marginLeft="16dp"/>
+        android:layout_marginLeft="16dp"
+        android:textColor="@color/white"
+        android:fontFamily="@font/poppins"
+        android:backgroundTint="#800000"/>
 </RelativeLayout>

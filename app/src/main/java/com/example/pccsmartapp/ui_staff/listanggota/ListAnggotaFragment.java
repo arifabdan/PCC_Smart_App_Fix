@@ -20,7 +20,13 @@ import com.example.pccsmartapp.Registrasi;
 import com.example.pccsmartapp.User;
 import com.example.pccsmartapp.databinding.FragmentListAnggota2Binding;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class ListAnggotaFragment extends Fragment {
 
@@ -33,7 +39,6 @@ public class ListAnggotaFragment extends Fragment {
 
         binding = FragmentListAnggota2Binding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
         tambahanggota = root.findViewById(R.id.tambahanggota);
         tambahanggota.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -1,7 +1,9 @@
 package com.example.pccsmartapp.ui_staff.home;
 
 
+import androidx.appcompat.app.ActionBar;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,17 +13,17 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import com.example.pccsmartapp.LihatAnggota2;
 
-
+import com.example.pccsmartapp.LihatAnggota1;
 import com.example.pccsmartapp.Login;
-import com.example.pccsmartapp.MessagingService;
 import com.example.pccsmartapp.R;
 import com.example.pccsmartapp.TrackingJalur;
 import com.example.pccsmartapp.databinding.FragmentHome1Binding;
 import com.example.pccsmartapp.Preferences;
+import com.example.pccsmartapp.databinding.FragmentHomeBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -48,9 +50,9 @@ public class HomeFragmentStaff extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentHome1Binding.inflate(inflater, container, false);
         View root = binding.getRoot();
+        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
+        actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.orange)));
 
-        Intent serviceI = new Intent(getActivity(), MessagingService.class);
-        getActivity().startService(serviceI);
 
         greettxt = root.findViewById(R.id.greetingstxt);
         remindertxt = root.findViewById(R.id.remindertxt);
@@ -94,7 +96,7 @@ public class HomeFragmentStaff extends Fragment {
         lihatanggota.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), LihatAnggota2.class);
+                Intent intent = new Intent(getActivity(), LihatAnggota1.class);
                 startActivity(intent);
             }
         });
@@ -121,6 +123,7 @@ public class HomeFragmentStaff extends Fragment {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         String tanggal = snapshot.child("eventDate").getValue(String.class);
 
+
                         long dateInMillis = convertDateToMillis(tanggal);
 
                         // Pastikan tanggal tidak kurang dari tanggal saat ini
@@ -136,7 +139,7 @@ public class HomeFragmentStaff extends Fragment {
                     }
 
                     if (!closestDate.isEmpty()) {
-                        remindertxt.setText("Reminder Tanggal Event: " + closestDate);
+                        remindertxt.setText("Tanggal Event Terdekat: " + closestDate);
                     } else {
                         remindertxt.setText("Tidak ada acara mendatang");
                     }

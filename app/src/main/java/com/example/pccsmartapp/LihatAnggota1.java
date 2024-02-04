@@ -4,20 +4,29 @@ import static android.content.ContentValues.TAG;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -59,37 +68,40 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallback {
+public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallback, SensorEventListener {
 
     private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 1;
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private GoogleMap map;
-    private PlacesClient placesClient;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private DatabaseReference userLocationData;
     private LocationCallback locationCallback;
     private Marker userMarker;
-    private double THRESHOLD_FALL = 20.6;
+    private double THRESHOLD_FALL=20.6;
+    private String currentStatus = "Normal";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_lihat_anggota);
 
+
+        super.onCreate(savedInstanceState);
+        getSupportActionBar().hide();
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.white)));
+        setContentView(R.layout.activity_lihat_anggota);
         FirebaseApp.initializeApp(this);
-        Intent serviceI = new Intent(this, MessagingService.class);
-        startService(serviceI);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-
-        Places.initialize(this, "AIzaSyCuCk-V1xx4wjZuexn58sUO-sMxYjZX7qA");
-        placesClient = Places.createClient(this);
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -99,61 +111,142 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
             mapFragment.getMapAsync(this);
         }
         userLocationData = FirebaseDatabase.getInstance().getReference("User_Location");
-        FirebaseMessaging.getInstance().getToken()
-                .addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
-                            return;
-                        }
-
-                        String token = task.getResult();
-                        Log.d(TAG, token);
-                    }
-                });
 
     }
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            float x = event.values[0];
-            float y = event.values[1];
-            float z = event.values[2];
+            float Ax = event.values[0];
+            float Ay = event.values[1];
+            float Az = event.values[2];
 
-            double acceleration = Math.sqrt(x * x + y * y + z * z);
+            double acceleration = Math.sqrt(Ax * Ax + Ay * Ay + Az * Az);
 
+            double gravity = SensorManager.GRAVITY_EARTH;
+            double accelerationWithoutGravity = acceleration - gravity;
+
+            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (currentUser != null) {
+                String userId = currentUser.getUid();
+                DatabaseReference userDataRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+
+                userDataRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            String userRole = dataSnapshot.child("role").getValue(String.class);
+
+                            // Hanya lanjut jika peran pengguna adalah "Anggota"
+                            if ("Anggota".equals(userRole)) {
+                                if (accelerationWithoutGravity > THRESHOLD_FALL) {
+                                    if (!currentStatus.equals("Jatuh")) {
+                                        currentStatus = "Jatuh";
+                                        updateStatusInFirebase(currentStatus);
+                                        showNotification("Fall Notification", "Terjatuh");
+                                    }
+                                } else {
+                                    if (!currentStatus.equals("Normal")) {
+                                        currentStatus = "Normal";
+                                        updateStatusInFirebase(currentStatus);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
         }
     }
 
-    @Override
+    private void showNotification(String title, String message) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        int notificationId = 1;
+        String channelId = "staff_channel";
+        CharSequence channelName = "Staff Channel";
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.drawable.ic_baseline_notification_important_24)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        // Tampilkan notifikasi
+        notificationManager.notify(notificationId, builder.build());
+    }
+    private void updateStatusInFirebase(String status) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            String userId = user.getUid();
+            DatabaseReference userLocationData = FirebaseDatabase.getInstance().getReference("User_Location").child(userId);
+
+            userLocationData.child("status").setValue(status);
+        }
+    }
+
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
 
-        userLocationData.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                googleMap.clear();
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            DatabaseReference userDataRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
 
-                for (DataSnapshot lastlocation : snapshot.getChildren()) {
-                    String UID = lastlocation.getKey();
-                    String username = lastlocation.child("username").getValue(String.class);
-                    double latitude = lastlocation.child("latitude").getValue(Double.class);
-                    double longitude = lastlocation.child("longitude").getValue(Double.class);
+            userDataRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        String userRole = dataSnapshot.child("role").getValue(String.class);
 
-                    LatLng latLng = new LatLng(latitude, longitude);
-                    if (latitude != 0 && longitude != 0) {
-                        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.sepeda);
-                        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(username).icon(BitmapDescriptorFactory.fromBitmap(bitmap));
-                        googleMap.addMarker(markerOptions);
+                        if ("Anggota".equals(userRole)) {
+                            userLocationData.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    googleMap.clear();
+
+                                    for (DataSnapshot lastLocation : snapshot.getChildren()) {
+                                        String username = lastLocation.child("username").getValue(String.class);
+                                        Double latitude = lastLocation.child("latitude").getValue(Double.class);
+                                        Double longitude = lastLocation.child("longitude").getValue(Double.class);
+
+                                        // Periksa apakah nilai latitude dan longitude tidak null
+                                        if (latitude != null && longitude != null) {
+                                            LatLng latLng = new LatLng(latitude, longitude);
+                                            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.sepeda);
+                                            MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(username).icon(BitmapDescriptorFactory.fromBitmap(bitmap));
+                                            googleMap.addMarker(markerOptions);
+                                        }
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    // Handle batal permintaan
+                                }
+                            });
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    // Handle batal permintaan
+                }
+            });
+        }
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -183,13 +276,13 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 if (snapshot.exists()) {
                                     String userRole = snapshot.child("role").getValue(String.class);
-                                    // Menambahkan kondisi untuk membatasi pengambilan data lokasi hanya untuk anggota
                                     if ("Anggota".equals(userRole)) {
                                         String username = snapshot.child("username").getValue(String.class);
                                         if (username != null) {
                                             userLocationData.child("username").setValue(username);
                                             userLocationData.child("latitude").setValue(location.getLatitude());
                                             userLocationData.child("longitude").setValue(location.getLongitude());
+                                            userLocationData.child("status").setValue(currentStatus);
                                             if (userMarker == null) {
                                                 userMarker = map.addMarker(new MarkerOptions()
                                                         .position(new LatLng(location.getLatitude(), location.getLongitude()))
@@ -251,7 +344,14 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
 
     protected void onResume() {
         super.onResume();
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         reqLocationUpdates();
+    }
+
+    protected void onPause() {
+        super.onPause();
+        // Hentikan pendaftaran listener saat aplikasi dihentikan atau di-background
+        sensorManager.unregisterListener(this);
     }
 
     @Override

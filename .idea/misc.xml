@@ -7,13 +7,15 @@
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/drawable/ic_profile.xml" value="0.325" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/drawable/registrasi_icon.xml" value="0.27" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/drawable/roundbutton.xml" value="0.325" />
+        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/drawable/shape.xml" value="0.1615" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_home.xml" value="0.18385416666666668" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_home1.xml" value="0.184375" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_home_2.xml" value="0.18385416666666668" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_home_anggota.xml" value="0.2682291666666667" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_lihat_anggota.xml" value="0.18" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_lihat_anggota2.xml" value="0.3692708333333333" />
-        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_login.xml" value="0.16979166666666667" />
+        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_lihat_detail.xml" value="0.259963768115942" />
+        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_login.xml" value="0.25" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_login_admin.xml" value="0.3692708333333333" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_login_or_regis.xml" value="0.22" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_main.xml" value="0.25" />
@@ -35,7 +37,7 @@
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_registrasi.xml" value="0.3692708333333333" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_second.xml" value="0.184375" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/item_anggota.xml" value="0.36822916666666666" />
-        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/item_event.xml" value="0.2" />
+        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/item_event.xml" value="0.33" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/item_list_anggota.xml" value="0.3692708333333333" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/menu/bottom_nav_menu.xml" value="0.18385416666666668" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/menu/bottom_nav_menu_1.xml" value="0.3692708333333333" />
@@ -46,7 +48,7 @@
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$" />
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="Embedded JDK" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Embedded JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

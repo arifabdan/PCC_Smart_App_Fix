@@ -3,9 +3,11 @@ package com.example.pccsmartapp;
 
 
 
+
+
 import static com.example.pccsmartapp.databinding.ActivityHome1Binding.inflate;
 
-
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 
@@ -31,16 +33,11 @@ public class HomeActivityStaff extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide();
 
-        HomeFragmentStaff fragmentStaff = new HomeFragmentStaff();
-        HomeFragmentAnggota fragmentAnggota = new HomeFragmentAnggota();
-
-
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.orange)));
         binding = inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-
+        getWindow().setNavigationBarColor(getResources().getColor(R.color.orange));
         BottomNavigationView navView = findViewById(R.id.nav_view_1);
-
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.navigation_home, R.id.navigation_list_anggota, R.id.navigation_list_event)
                 .build();

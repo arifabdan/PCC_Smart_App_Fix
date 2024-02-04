@@ -33,15 +33,17 @@ public class AnggotaAdapter extends FirebaseRecyclerAdapter<User, AnggotaAdapter
 
     // ViewHolder untuk menangani tampilan setiap item di RecyclerView
     public static class AnggotaViewHolder extends RecyclerView.ViewHolder {
-        private TextView namaTextView;
+        private TextView namaTextView, tahuntextView;
 
         public AnggotaViewHolder(@NonNull View itemView) {
             super(itemView);
             namaTextView = itemView.findViewById(R.id.namaTextView);
+            tahuntextView = itemView.findViewById(R.id.TahunTextView);
         }
 
         public void bind(User user) {
             namaTextView.setText(user.getUsername());
+            tahuntextView.setText(user.getTahunGabung());
         }
     }
 }

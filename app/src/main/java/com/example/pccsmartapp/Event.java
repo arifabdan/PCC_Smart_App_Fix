@@ -9,6 +9,7 @@ public class Event {
     private String eventDate;
 
     public Event() {
+
     }
 
     public Event(String eventName, String start, String finish, String description, String eventDate) {
@@ -18,6 +19,7 @@ public class Event {
         this.description = description;
         this.eventDate = eventDate;
     }
+
 
     // Getter dan setter (sesuaikan kebutuhan)
     public String getEventName() {
@@ -60,3 +62,4 @@ public class Event {
         this.eventDate = eventDate;
     }
 }
+

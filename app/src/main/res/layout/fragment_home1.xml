@@ -7,16 +7,23 @@
 
    <LinearLayout
        android:id="@+id/profileSection"
-       android:layout_width="match_parent"
+       android:layout_width="300dp"
        android:layout_height="wrap_content"
-       android:orientation="vertical">
+       android:orientation="vertical"
+       android:background="@drawable/shape"
+       android:backgroundTint="#d3d3d3"
+       android:layout_centerHorizontal="true">
 
       <TextView
           android:id="@+id/greetingstxt"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:layout_marginTop="30dp"
-          />
+          android:textSize="20dp"
+          android:textColor="@color/black"
+          android:fontFamily="@font/poppins"
+          android:textStyle="normal"
+          android:gravity="center"/>
 
 
    </LinearLayout>
@@ -26,7 +33,9 @@
        android:layout_width="match_parent"
        android:layout_height="wrap_content"
        android:layout_below="@id/profileSection"
-       android:orientation="horizontal">
+       android:orientation="horizontal"
+       android:paddingLeft="5dp"
+       android:paddingTop="10dp">
 
       <!-- Button 1 -->
       <Button
@@ -36,7 +45,10 @@
           android:layout_weight="1"
           android:layout_marginRight="8dp"
           android:text="Lihat Anggota"
-          android:textSize="10dp"/>
+          android:textSize="10dp"
+          android:fontFamily="@font/poppins"
+          android:textStyle="bold"
+          android:backgroundTint="#03C988"/>
 
       <!-- Button 2 -->
       <Button
@@ -46,7 +58,10 @@
           android:layout_weight="1"
           android:layout_marginRight="8dp"
           android:text="Tracking Jalur"
-          android:textSize="10dp"/>
+          android:textSize="10dp"
+          android:fontFamily="@font/poppins"
+          android:textStyle="bold"
+          android:backgroundTint="#2CD3E1"/>
 
 
    </LinearLayout>
@@ -57,9 +72,11 @@
        android:layout_height="wrap_content"
        android:text="Reminder :"
        android:layout_below="@id/menuButtons"
-       android:layout_marginTop="30dp"/>
+       android:layout_marginTop="30dp"
+       android:textSize="20dp"
+       android:fontFamily="@font/poppins"
+       android:textStyle="bold"/>
 
-   <!-- Image Spinner -->
    <Button
        android:id="@+id/button3"
        android:layout_width="100dp"
@@ -68,6 +85,9 @@
        android:layout_marginRight="8dp"
        android:text="Logout"
        android:textSize="10dp"
-       android:layout_below="@+id/remindertxt"/>
+       android:layout_below="@+id/remindertxt"
+       android:textColor="@color/white"
+       android:fontFamily="@font/poppins"
+       android:backgroundTint="#800000"/>
 
 </RelativeLayout>

@@ -35,7 +35,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.ElevationApi;
@@ -62,6 +68,7 @@ public class ListEventFragment extends Fragment{
         binding = FragmentListEvent1Binding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+
         tambahEvent = root.findViewById(R.id.tambahevent);
         tambahEvent.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,6 +77,7 @@ public class ListEventFragment extends Fragment{
                 startActivity(intent);
             }
         });
+
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         RecyclerView recyclerView = root.findViewById(R.id.recyclerView);

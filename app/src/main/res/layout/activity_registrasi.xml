@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/logo"
         android:layout_marginLeft="125dp"
-        android:layout_marginTop="50dp">
+        android:layout_marginTop="40dp">
     </ImageView>
 
     <TextView
@@ -27,41 +27,52 @@
         android:textColor="@color/black"
         android:textSize="19dp"
         android:textStyle="bold"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="10dp">
     </TextView>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true">
+        android:layout_centerInParent="true"
+        >
 
         <EditText
             android:id="@+id/emailEditText"
             android:layout_width="match_parent"
             android:layout_height="50dp"
+            android:layout_margin="5dp"
             android:hint="Email"
+            android:background="@drawable/shape"
             android:inputType="textEmailAddress"
+            android:fontFamily="@font/poppins"
             />
 
     <EditText
         android:id="@+id/usernameEditText"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:layout_margin="5dp"
         android:hint="Username"
-        android:layout_below="@id/emailEditText"/>
+        android:background="@drawable/shape"
+        android:layout_below="@id/emailEditText"
+        android:fontFamily="@font/poppins"/>
 
 
     <EditText
         android:id="@+id/tahungbgEditText"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/shape"
         android:layout_below="@id/usernameEditText"
         android:hint="Tahun Gabung "
+        android:fontFamily="@font/poppins"
          />
 
     <Spinner
         android:id="@+id/roleSpinner"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:layout_margin="5dp"
         android:layout_below="@id/tahungbgEditText"
     />
 
@@ -69,9 +80,12 @@
             android:id="@+id/passwordEditText"
             android:layout_width="match_parent"
             android:layout_height="50dp"
+            android:layout_margin="5dp"
             android:layout_below="@id/roleSpinner"
             android:hint="Password"
+            android:background="@drawable/shape"
             android:inputType="textPassword"
+            android:fontFamily="@font/poppins"
             />
 
     </RelativeLayout>

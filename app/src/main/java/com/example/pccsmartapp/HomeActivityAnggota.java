@@ -1,5 +1,6 @@
 package com.example.pccsmartapp;
 
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -22,10 +23,9 @@ public class HomeActivityAnggota extends AppCompatActivity {
 
         binding = ActivityHomeAnggotaBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.orange)));
         BottomNavigationView navView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
+        getWindow().setNavigationBarColor(getResources().getColor(R.color.orange));
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.navigation_home, R.id.navigation_list_event, R.id.navigation_profile)
                 .build();

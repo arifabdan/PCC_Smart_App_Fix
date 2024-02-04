@@ -3,7 +3,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="105dp">
+    android:layout_height="105dp"
+    android:background="@drawable/shape"
+    android:layout_margin="5dp"
+    android:backgroundTint="#F99417">
 
     <TextView
         android:layout_width="200dp"
@@ -15,17 +18,22 @@
         android:layout_marginEnd="20dp"
         android:maxLines="1"
         android:layout_marginTop="15dp"
-        android:layout_height="wrap_content"/>
-
-
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/poppins"/>
     <TextView
-        android:id="@+id/border2"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginStart="15dp"
-        android:layout_marginEnd="15dp"
-        android:layout_alignParentBottom="true"
-        android:background="#808080"/>
+        android:layout_width="200dp"
+        android:id="@+id/TahunTextView"
+        android:textSize="16sp"
+        android:layout_marginStart="10dp"
+        android:text=""
+        android:textColor="@color/black"
+        android:layout_marginEnd="20dp"
+        android:maxLines="1"
+        android:layout_marginTop="15dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/poppins"
+        android:layout_below="@+id/namaTextView"/>
+
 
 
 </RelativeLayout>

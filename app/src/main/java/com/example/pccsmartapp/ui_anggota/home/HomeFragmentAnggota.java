@@ -10,10 +10,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.example.pccsmartapp.LihatAnggota1;
-import com.example.pccsmartapp.MessagingService;
 import com.example.pccsmartapp.R;
 
 
@@ -36,7 +34,7 @@ public class HomeFragmentAnggota extends Fragment {
 
     private FragmentHomeBinding binding;
     private Button lihatanggota,tracking;
-    private TextView remindertxt,greettxt;
+    private TextView remindertxt,greettxt, namatxt, starttxt, finishtxt;
 
     private FirebaseAuth firebaseAuth;
     private DatabaseReference userReference;
@@ -50,11 +48,14 @@ public class HomeFragmentAnggota extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        Intent serviceI = new Intent(getActivity(), MessagingService.class);
-        getActivity().startService(serviceI);
 
         greettxt = root.findViewById(R.id.greetingstxt);
         remindertxt = root.findViewById(R.id.remindertxt);
+        namatxt = root.findViewById(R.id.namaeventtxt);
+        starttxt = root.findViewById(R.id.starttxt);
+        finishtxt = root.findViewById(R.id.finishtxt);
+
+
 
         firebaseAuth = FirebaseAuth.getInstance();
 
@@ -119,9 +120,17 @@ public class HomeFragmentAnggota extends Fragment {
                     long currentDateInMillis = System.currentTimeMillis();
                     long closestDateDifference = Long.MAX_VALUE;
                     String closestDate = "";
+                    String NamaEvent = "";
+                    String Start = "";
+                    String Finish = "";
+
+
 
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         String tanggal = snapshot.child("eventDate").getValue(String.class);
+                        String Nama = snapshot.child("eventName").getValue(String.class);
+                        String start = snapshot.child("start").getValue(String.class);
+                        String finish = snapshot.child("finish").getValue(String.class);
 
                         long dateInMillis = convertDateToMillis(tanggal);
 
@@ -133,12 +142,19 @@ public class HomeFragmentAnggota extends Fragment {
                             if (dateDifference < closestDateDifference || (dateDifference == closestDateDifference && dateInMillis < convertDateToMillis(closestDate))) {
                                 closestDateDifference = dateDifference;
                                 closestDate = tanggal;
+                                NamaEvent = Nama;
+                                Start = start;
+                                Finish = finish;
                             }
                         }
                     }
 
                     if (!closestDate.isEmpty()) {
                         remindertxt.setText("Reminder Tanggal Event: " + closestDate);
+                        namatxt.setText("Nama Event : " + NamaEvent);
+                        starttxt.setText("Start : " + Start);
+                        finishtxt.setText("Finish: " + Finish);
+
                     } else {
                         remindertxt.setText("Tidak ada acara mendatang");
                     }

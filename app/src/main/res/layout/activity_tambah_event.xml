@@ -59,7 +59,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:backgroundTint="@color/black"
-                android:text="Tambah Event"/>
+                android:text="Tambah Event"
+                android:textColor="@android:color/white"/>
         </LinearLayout>
 
     </ScrollView>

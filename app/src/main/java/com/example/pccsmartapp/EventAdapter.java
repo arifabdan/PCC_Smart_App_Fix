@@ -1,10 +1,12 @@
 package com.example.pccsmartapp;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,11 +21,23 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.List;
+
 public class EventAdapter extends FirebaseRecyclerAdapter<Event, EventAdapter.EventViewHolder> {
 private Button Lihat,Edit,Delete;
+private DatabaseReference databaseRef;
+private FirebaseDatabase firebaseDatabase;
+    private List<Event> eventList;
+    private Context context;
+
+
     public EventAdapter(@NonNull FirebaseRecyclerOptions<Event> options) {
         super(options);
+        databaseRef = FirebaseDatabase.getInstance().getReference().child("Event");
+        this.eventList = eventList;
+        this.context = context;
     }
+
 
     @Override
     protected void onBindViewHolder(@NonNull EventViewHolder holder, int position, @NonNull Event model) {
@@ -43,6 +57,9 @@ private Button Lihat,Edit,Delete;
     // ViewHolder untuk menangani tampilan setiap item di RecyclerView
     public static class EventViewHolder extends RecyclerView.ViewHolder {
         private TextView namaTextView,startTxt,finishTxt,TanggalTxt;
+        private Button delete;
+
+
 
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -58,6 +75,7 @@ private Button Lihat,Edit,Delete;
             finishTxt.setText(event.getFinish());
             TanggalTxt.setText(event.getEventDate());
         }
+
 
     }
 }

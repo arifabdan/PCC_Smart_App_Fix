@@ -48,6 +48,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -162,6 +163,18 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
         }
     }
 
+    private void focusCameraOnLocation(double latitude, double longitude) {
+        if (map != null) {
+            LatLng location = new LatLng(latitude, longitude);
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(location)
+                    .zoom(15) // Sesuaikan level zoom yang diinginkan
+                    .build();
+
+            map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        }
+    }
+
     private void showNotification(String title, String message) {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -188,7 +201,7 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             String userId = user.getUid();
-            DatabaseReference userLocationData = FirebaseDatabase.getInstance().getReference("User_Location").child(userId);
+            DatabaseReference userLocationData = FirebaseDatabase.getInstance().getReference("Status").child(userId);
 
             userLocationData.child("status").setValue(status);
         }
@@ -282,7 +295,6 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
                                             userLocationData.child("username").setValue(username);
                                             userLocationData.child("latitude").setValue(location.getLatitude());
                                             userLocationData.child("longitude").setValue(location.getLongitude());
-                                            userLocationData.child("status").setValue(currentStatus);
                                             if (userMarker == null) {
                                                 userMarker = map.addMarker(new MarkerOptions()
                                                         .position(new LatLng(location.getLatitude(), location.getLongitude()))

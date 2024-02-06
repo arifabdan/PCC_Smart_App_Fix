@@ -1,6 +1,7 @@
 package com.example.pccsmartapp.ui_anggota.home;
 
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.example.pccsmartapp.LihatAnggota1;
@@ -47,6 +50,8 @@ public class HomeFragmentAnggota extends Fragment {
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+        ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
+        actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.orange)));
 
 
         greettxt = root.findViewById(R.id.greetingstxt);

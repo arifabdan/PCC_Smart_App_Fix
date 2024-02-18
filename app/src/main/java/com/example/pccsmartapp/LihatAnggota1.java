@@ -30,6 +30,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -63,6 +64,7 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -112,7 +114,61 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
             mapFragment.getMapAsync(this);
         }
         userLocationData = FirebaseDatabase.getInstance().getReference("User_Location");
+        userLocationData.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                    String uid = userSnapshot.getKey();
+                    if (uid != null) {
+                        DatabaseReference statusRef = FirebaseDatabase.getInstance().getReference("User_Location").child(uid);
+                        statusRef.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot statusSnapshot) {
+                                // Method ini akan dipanggil saat ada perubahan pada status di bawah simpul dengan UID tertentu
+                                String newStatus = statusSnapshot.child("status").getValue(String.class);
+                                if (newStatus != null && newStatus.equals("Jatuh")) {
+                                    // Dapatkan username dari snapshot user
+                                    String username = userSnapshot.child("username").getValue(String.class);
+                                    if (username != null) {
+                                        // Dapatkan koordinat geografis pengguna yang terdeteksi jatuh
+                                        Double latitude = userSnapshot.child("latitude").getValue(Double.class);
+                                        Double longitude = userSnapshot.child("longitude").getValue(Double.class);
+                                        if (latitude != null && longitude != null) {
+                                            // Pindahkan kamera ke lokasi pengguna yang terdeteksi jatuh
+                                            LatLng location = new LatLng(latitude, longitude);
+                                            focusCameraOnLocation(location);
+                                        }
+                                        // Lakukan sesuatu dengan username, misalnya tampilkan notifikasi
+                                        showNotification("Status Berubah", username + " telah jatuh");
+                                    }
+                                }
+                            }
 
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+    private void focusCameraOnLocation(LatLng location) {
+        if (map != null) {
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(location)
+                    .zoom(15) // Sesuaikan level zoom yang diinginkan
+                    .build();
+
+            map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        }
     }
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -122,8 +178,6 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
 
             double acceleration = Math.sqrt(Ax * Ax + Ay * Ay + Az * Az);
 
-            double gravity = SensorManager.GRAVITY_EARTH;
-            double accelerationWithoutGravity = acceleration - gravity;
 
             FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
             if (currentUser != null) {
@@ -138,11 +192,10 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
 
                             // Hanya lanjut jika peran pengguna adalah "Anggota"
                             if ("Anggota".equals(userRole)) {
-                                if (accelerationWithoutGravity > THRESHOLD_FALL) {
+                                if (acceleration > THRESHOLD_FALL) {
                                     if (!currentStatus.equals("Jatuh")) {
                                         currentStatus = "Jatuh";
                                         updateStatusInFirebase(currentStatus);
-                                        showNotification("Fall Notification", "Terjatuh");
                                     }
                                 } else {
                                     if (!currentStatus.equals("Normal")) {
@@ -160,18 +213,6 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
                     }
                 });
             }
-        }
-    }
-
-    private void focusCameraOnLocation(double latitude, double longitude) {
-        if (map != null) {
-            LatLng location = new LatLng(latitude, longitude);
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(location)
-                    .zoom(15) // Sesuaikan level zoom yang diinginkan
-                    .build();
-
-            map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         }
     }
 
@@ -201,7 +242,7 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             String userId = user.getUid();
-            DatabaseReference userLocationData = FirebaseDatabase.getInstance().getReference("Status").child(userId);
+            DatabaseReference userLocationData = FirebaseDatabase.getInstance().getReference("User_Location").child(userId);
 
             userLocationData.child("status").setValue(status);
         }
@@ -213,53 +254,30 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
 
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            String userId = currentUser.getUid();
-            DatabaseReference userDataRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+        userLocationData.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                googleMap.clear();
 
-            userDataRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        String userRole = dataSnapshot.child("role").getValue(String.class);
+                for (DataSnapshot lastLocation : snapshot.getChildren()) {
+                    String username = lastLocation.child("username").getValue(String.class);
+                    Double latitude = lastLocation.child("latitude").getValue(Double.class);
+                    Double longitude = lastLocation.child("longitude").getValue(Double.class);
 
-                        if ("Anggota".equals(userRole)) {
-                            userLocationData.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    googleMap.clear();
-
-                                    for (DataSnapshot lastLocation : snapshot.getChildren()) {
-                                        String username = lastLocation.child("username").getValue(String.class);
-                                        Double latitude = lastLocation.child("latitude").getValue(Double.class);
-                                        Double longitude = lastLocation.child("longitude").getValue(Double.class);
-
-                                        // Periksa apakah nilai latitude dan longitude tidak null
-                                        if (latitude != null && longitude != null) {
-                                            LatLng latLng = new LatLng(latitude, longitude);
-                                            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.sepeda);
-                                            MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(username).icon(BitmapDescriptorFactory.fromBitmap(bitmap));
-                                            googleMap.addMarker(markerOptions);
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                    // Handle batal permintaan
-                                }
-                            });
-                        }
+                    if (latitude != null && longitude != null) {
+                        LatLng latLng = new LatLng(latitude, longitude);
+                        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.sepeda);
+                        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(username).icon(BitmapDescriptorFactory.fromBitmap(bitmap));
+                        googleMap.addMarker(markerOptions);
                     }
                 }
+            }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    // Handle batal permintaan
-                }
-            });
-        }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle batal permintaan
+            }
+        });
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {

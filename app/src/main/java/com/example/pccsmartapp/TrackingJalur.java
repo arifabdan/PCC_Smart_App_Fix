@@ -1,7 +1,10 @@
 package com.example.pccsmartapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,10 +19,17 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.ElevationApi;
@@ -43,6 +53,7 @@ public class TrackingJalur extends AppCompatActivity implements OnMapReadyCallba
     private AtomicBoolean isMapReady = new AtomicBoolean(false);
     private ElevationResult[] elevationResults;
     private List<Polyline> polylineList = new ArrayList<>();
+    private DatabaseReference userLocationData;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,11 +73,37 @@ public class TrackingJalur extends AppCompatActivity implements OnMapReadyCallba
         });
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapsevent);
         mapFragment.getMapAsync(this);
+        userLocationData = FirebaseDatabase.getInstance().getReference("User_Location");
     }
     @Override
     public void onMapReady(GoogleMap googleMap) {
         isMapReady.set(true);
         mMap = googleMap;
+
+        userLocationData.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                googleMap.clear();
+
+                for (DataSnapshot lastLocation : snapshot.getChildren()) {
+                    String username = lastLocation.child("username").getValue(String.class);
+                    Double latitude = lastLocation.child("latitude").getValue(Double.class);
+                    Double longitude = lastLocation.child("longitude").getValue(Double.class);
+
+                    if (latitude != null && longitude != null) {
+                        LatLng latLng = new LatLng(latitude, longitude);
+                        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.sepeda);
+                        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(username).icon(BitmapDescriptorFactory.fromBitmap(bitmap));
+                        googleMap.addMarker(markerOptions);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle batal permintaan
+            }
+        });
     }
     private void processDirections(String startLocation, String destinationLocation) {
         DirectionsTask directionsTask = new DirectionsTask();
@@ -117,7 +154,6 @@ public class TrackingJalur extends AppCompatActivity implements OnMapReadyCallba
             List<Integer> colors = new ArrayList<>();
 
             try {
-                // Creating a request for the Maps Elevation API
                 GeoApiContext geoApiContext = new GeoApiContext.Builder()
                         .apiKey("AIzaSyDkKvzMxiKerYMBZuUr4sFulKIb_ieIV7c")
                         .build();
@@ -129,24 +165,20 @@ public class TrackingJalur extends AppCompatActivity implements OnMapReadyCallba
                 for (int i = 0; i < directionsResult.routes.length; i++) {
                     com.google.maps.model.LatLng[] path = directionsResult.routes[i].overviewPolyline.decodePath().toArray(new com.google.maps.model.LatLng[0]);
 
-                    // Iterasi melalui setiap titik pada rute
                     for (int j = 0; j < path.length; j++) {
                         LatLng coordinate = new LatLng(path[j].lat, path[j].lng);
                         coordinates.add(coordinate);
 
-                        // Periksa apakah elevationResults tidak null dan indeks valid
                         if (elevationResults != null && j < elevationResults.length) {
                             double elevation = elevationResults[j].elevation;
                             int color = getColorByElevationAndSlope(elevation, getKemiringanJalan(j, path, elevationResults));
                             colors.add(color);
                         } else {
-                            // Jika data elevasi tidak tersedia, gunakan warna default
                             colors.add(Color.GRAY);
                         }
                     }
                 }
 
-                // Drawing polylines with corresponding colors
                 int start = 0;
                 int end = 0;
                 int zIndex = 1;
@@ -192,11 +224,9 @@ public class TrackingJalur extends AppCompatActivity implements OnMapReadyCallba
         private com.google.maps.model.LatLng[] getLatLngArray(DirectionsResult directionsResult) {
             List<com.google.maps.model.LatLng> latLngList = new ArrayList<>();
 
-            // Iterate through the routes
             for (int i = 0; i < directionsResult.routes.length; i++) {
                 com.google.maps.model.LatLng[] path = directionsResult.routes[i].overviewPolyline.decodePath().toArray(new com.google.maps.model.LatLng[0]);
 
-                // Iterate through each point on the route
                 for (int j = 0; j < path.length; j++) {
                     Log.d("PathPoint", "Lat: " + path[j].lat + ", Lng: " + path[j].lng);
                     latLngList.add(path[j]);
@@ -228,18 +258,20 @@ public class TrackingJalur extends AppCompatActivity implements OnMapReadyCallba
         }
 
         private int getColorByElevationAndSlope(double elevation, double slope) {
-            // Adjust color based on elevation and slope
             Log.d("ElevationApi", "Elevation: " + elevation + ", Slope: " + slope);
-            double slopeIncrement = 0.01;
 
-            if (slope < slopeIncrement) {
+            if (slope <= 0.0) {
                 return Color.rgb(0, 255, 0);
-            } else if (slope < slopeIncrement * 2) {
+            } else if (slope <= 0.03) {
                 return Color.rgb(255, 255, 0);
-            } else if (slope < slopeIncrement * 5) {
+            } else if (slope <= 0.06) {
                 return Color.rgb(255, 165, 0);
-            } else {
+            } else if (slope <= 0.09) {
+                return Color.rgb(255, 140, 0);
+            } else if (slope <= 0.15) {
                 return Color.rgb(255, 0, 0);
+            } else {
+                return Color.rgb(0, 0, 0);
             }
         }
     }

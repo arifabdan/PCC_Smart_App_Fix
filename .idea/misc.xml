@@ -20,7 +20,7 @@
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_login_or_regis.xml" value="0.22" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_registrasi.xml" value="0.18385416666666668" />
-        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_tambah_event.xml" value="0.184375" />
+        <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_tambah_event.xml" value="0.25" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/activity_tracking_jalur.xml" value="0.18385416666666668" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_dashboard.xml" value="0.18385416666666668" />
         <entry key="..\:/Users/AiAbe/StudioProjects/PCCSmartApp/app/src/main/res/layout/fragment_home.xml" value="0.33" />
@@ -48,7 +48,7 @@
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$" />
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="11" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

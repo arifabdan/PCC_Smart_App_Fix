@@ -1,10 +1,19 @@
 package com.example.pccsmartapp;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationManager;
+import android.location.LocationRequest;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,16 +21,30 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.maps.DirectionsApi;
@@ -34,36 +57,98 @@ import com.google.maps.model.ElevationResult;
 import com.google.maps.model.TravelMode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class TambahEvent extends AppCompatActivity {
+public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback {
     private EditText namatxt, start, finish, deskripsi;
     private DatePicker tanggal;
-    private Button tambahEvent;
+    private Button tambahTujuan, tambahEvent;
     private DatabaseReference mDatabase;
     private GoogleMap mMap;
     private Polyline currentPolyline;
+    private FusedLocationProviderClient fusedLocationClient;
+    private Place selectedStartPlace;
+    private Place selectedFinishPlace;
+    private List<Place> daftarTujuan = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tambah_event);
-        // Inisialisasi Firebase Database
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        // Inisialisasi elemen UI
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.maps);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
+
         namatxt = findViewById(R.id.namaevent);
-        start = findViewById(R.id.Start);
-        finish = findViewById(R.id.tujuan);
         deskripsi = findViewById(R.id.deskripsi);
         tanggal = findViewById(R.id.tanggalPicker);
         tambahEvent = findViewById(R.id.simpanevent);
 
-        String StartLoc = start.getText().toString();
-        String FinishLoc = finish.getText().toString();
 
-        processDirections(StartLoc, FinishLoc);
+
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), "AIzaSyCEC70VvQ3VeOESBOy3XpwSwVlTYYU_sbo");
+        }
+
+        // Create a new Places client instance
+        PlacesClient placesClient = Places.createClient(this);
+
+        AutocompleteSupportFragment autocompleteFragmentStart = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment_start);
+        autocompleteFragmentStart.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
+
+        autocompleteFragmentStart.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                // Simpan tempat yang dipilih pada EditText start
+                selectedStartPlace = place;
+                Log.i(TAG, "Start Place: " + place.getName() + ", " + place.getId());
+
+                // Proses jalur setelah kedua lokasi dipilih
+                if (selectedStartPlace != null && selectedFinishPlace != null) {
+                    processDirections(selectedStartPlace, selectedFinishPlace);
+                }
+            }
+
+            @Override
+            public void onError(@NonNull Status status) {
+                // Tangani kesalahan
+                Log.i(TAG, "An error occurred: " + status);
+            }
+        });
+
+        AutocompleteSupportFragment autocompleteFragmentFinish = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment_finish);
+        autocompleteFragmentFinish.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
+
+        autocompleteFragmentFinish.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                // Simpan tempat yang dipilih pada EditText finish
+                selectedFinishPlace = place;
+                Log.i(TAG, "Finish Place: " + place.getName() + ", " + place.getId());
+
+                // Proses jalur setelah kedua lokasi dipilih
+                if (selectedStartPlace != null && selectedFinishPlace != null) {
+                    processDirections(selectedStartPlace, selectedFinishPlace);
+                }
+            }
+
+            @Override
+            public void onError(@NonNull Status status) {
+                // Tangani kesalahan
+                Log.i(TAG, "An error occurred: " + status);
+            }
+        });
+
 
         // Set listener untuk tombol tambahEvent
         tambahEvent.setOnClickListener(new View.OnClickListener() {
@@ -71,8 +156,6 @@ public class TambahEvent extends AppCompatActivity {
             public void onClick(View v) {
                 // Mendapatkan nilai dari elemen UI
                 String eventName = namatxt.getText().toString().trim();
-                String startTime = start.getText().toString().trim();
-                String endTime = finish.getText().toString().trim();
                 String eventDescription = deskripsi.getText().toString().trim();
 
                 // Mendapatkan tanggal dari DatePicker
@@ -83,18 +166,30 @@ public class TambahEvent extends AppCompatActivity {
                 // Format tanggal ke dalam string
                 String eventDate = day + "/" + month + "/" + year;
 
-                // Memanggil metode untuk menyimpan data event ke Firebase Database
-                saveEventData(eventName, startTime, endTime, eventDescription, eventDate);
+                // Memeriksa apakah tempat sudah dipilih
+                if (selectedStartPlace != null && selectedFinishPlace != null) {
+                    // Mendapatkan nama tempat dari AutocompleteSupportFragment
+                    String startPlace = selectedStartPlace.getName();
+                    String finishPlace = selectedFinishPlace.getName();
+
+                    // Memanggil metode untuk menyimpan data event ke Firebase Database
+                    saveEventData(eventName, startPlace, finishPlace, eventDescription, eventDate);
+                } else {
+
+                    Toast.makeText(TambahEvent.this, "Pilih tempat terlebih dahulu", Toast.LENGTH_SHORT).show();
+                }
             }
         });
+
     }
 
+
     // Metode untuk menyimpan data event ke Firebase Database
-    private void saveEventData (String eventName, String start, String finish, String description, String eventDate){
+    private void saveEventData (String eventName, String startPlace, String finishPlace, String description, String eventDate){
         DatabaseReference eventRef = mDatabase.child("Events");
         String eventId = eventRef.push().getKey();
 
-        Event event = new Event(eventName, start, finish, description, eventDate);
+        Event event = new Event(eventName, startPlace, finishPlace, description, eventDate);
 
         mDatabase.child("Event").child(eventId).setValue(event)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -108,15 +203,26 @@ public class TambahEvent extends AppCompatActivity {
                     }
                 });
     }
-    private void processDirections(String startLocation, String destinationLocation) {
-        com.example.pccsmartapp.TambahEvent.DirectionsTask directionsTask = new com.example.pccsmartapp.TambahEvent.DirectionsTask();
-        directionsTask.execute(startLocation, destinationLocation);
+
+    private void processDirections(Place startPlace, Place finishPlace) {
+        LatLng startLatLng = startPlace.getLatLng();
+        LatLng finishLatLng = finishPlace.getLatLng();
+
+        String startLocation = startLatLng.latitude + "," + startLatLng.longitude;
+        String finishLocation = finishLatLng.latitude + "," + finishLatLng.longitude;
+
+        DirectionsTask directionsTask = new DirectionsTask();
+        directionsTask.execute(startLocation, finishLocation);
     }
 
 
     public void onMapReady(GoogleMap googleMap) {
-
         mMap = googleMap;
+
+        // Proses jalur jika kedua lokasi sudah dipilih
+        if (selectedStartPlace != null && selectedFinishPlace != null) {
+            processDirections(selectedStartPlace, selectedFinishPlace);
+        }
     }
 
     private class DirectionsTask extends AsyncTask<String, Void, DirectionsResult> {

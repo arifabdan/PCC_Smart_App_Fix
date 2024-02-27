@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TambahEvent">
+    tools:context=".TambahEvent"
+    android:id="@+id/HalamanTambahEvent">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -24,18 +25,52 @@
                 android:layout_height="wrap_content"
                 android:hint="Nama Event"/>
 
-            <EditText
+            <TextView
                 android:id="@+id/Start"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Start"/>
+                android:text="Start"/>
 
-            <EditText
-                android:id="@+id/tujuan"
+            <fragment
+                android:id="@+id/autocomplete_fragment_start"
+                android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Finish"/>
+                android:hint="Start"
+                app:layout_constraintTop_toBottomOf="@+id/namaevent"
+                tools:ignore="MissingConstraints" />
 
+            <TextView
+                android:id="@+id/Finish"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Finish"/>
+
+            <fragment
+                android:id="@+id/autocomplete_fragment_finish"
+                android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Tujuan"
+                app:layout_constraintTop_toBottomOf="@+id/Start"
+                tools:ignore="MissingConstraints" />
+
+            <Button
+                android:id="@+id/tambahtujuan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tambah Tujuan"/>
+
+
+            <fragment
+                android:id="@+id/maps"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
 
             <EditText
                 android:id="@+id/deskripsi"

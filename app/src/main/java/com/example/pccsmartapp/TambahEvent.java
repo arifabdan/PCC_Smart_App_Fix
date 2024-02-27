@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback {
     private EditText namatxt, start, finish, deskripsi;
@@ -71,7 +72,8 @@ public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback
     private FusedLocationProviderClient fusedLocationClient;
     private Place selectedStartPlace;
     private Place selectedFinishPlace;
-    private List<Place> daftarTujuan = new ArrayList<>();
+    private AtomicBoolean isMapReady = new AtomicBoolean(false);
+    private List<Polyline> polylineList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -217,6 +219,7 @@ public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback
 
 
     public void onMapReady(GoogleMap googleMap) {
+        isMapReady.set(true);
         mMap = googleMap;
 
         // Proses jalur jika kedua lokasi sudah dipilih
@@ -264,67 +267,132 @@ public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void showRouteOnMap(DirectionsResult directionsResult) {
-        if (currentPolyline != null) {
-            currentPolyline.remove();
+        if (!isMapReady.get()) {
+            Log.e("DirectionsTask", "Map is not ready yet.");
+            return;
         }
+
+        clearPolylines();
 
         List<LatLng> coordinates = new ArrayList<>();
-
-        for (int i = 0; i < directionsResult.routes.length; i++) {
-            com.google.maps.model.LatLng[] path = directionsResult.routes[i].overviewPolyline.decodePath().toArray(new com.google.maps.model.LatLng[0]);
-            for (com.google.maps.model.LatLng latLng : path) {
-                LatLng coordinate = new LatLng(latLng.lat, latLng.lng);
-                coordinates.add(coordinate);
-            }
-        }
-
-        currentPolyline = mMap.addPolyline(new PolylineOptions().addAll(coordinates));
-
-        // Membuat array LatLng dari List<LatLng>
-        com.google.maps.model.LatLng[] latLngArray = new com.google.maps.model.LatLng[coordinates.size()];
-        for (int i = 0; i < coordinates.size(); i++) {
-            LatLng latLng = coordinates.get(i);
-            latLngArray[i] = new com.google.maps.model.LatLng(latLng.latitude, latLng.longitude);
-        }
-
-        // Membuat permintaan Elevation API
-        GeoApiContext geoApiContext = new GeoApiContext.Builder()
-                .apiKey("AIzaSyARwUqqEC-Fn9rHk9RWm5pr1SBSAPL1yeM")
-                .build();
-        PendingResult<ElevationResult[]> pendingResult = ElevationApi.getByPoints(geoApiContext, latLngArray);
+        List<Integer> colors = new ArrayList<>();
 
         try {
-            ElevationResult[] elevationResults = pendingResult.await();
-            if (elevationResults != null) {
-                for (int i = 0; i < elevationResults.length; i++) {
-                    ElevationResult elevationResult = elevationResults[i];
-                    double elevation = elevationResult.elevation;
+            GeoApiContext geoApiContext = new GeoApiContext.Builder()
+                    .apiKey("AIzaSyDkKvzMxiKerYMBZuUr4sFulKIb_ieIV7c")
+                    .build();
 
-                    // Mengatur warna polyline berdasarkan elevasi
-                    int color = getColorByElevation(elevation);
-                    currentPolyline.setColor(color);
+            com.google.maps.model.LatLng[] latLngArray = getLatLngArray(directionsResult);
+            ElevationResult[] elevationResults = ElevationApi.getByPoints(geoApiContext, latLngArray).await();
+
+            for (int i = 0; i < directionsResult.routes.length; i++) {
+                com.google.maps.model.LatLng[] path = directionsResult.routes[i].overviewPolyline.decodePath().toArray(new com.google.maps.model.LatLng[0]);
+
+                for (int j = 0; j < path.length; j++) {
+                    LatLng coordinate = new LatLng(path[j].lat, path[j].lng);
+                    coordinates.add(coordinate);
+
+                    if (elevationResults != null && j < elevationResults.length) {
+                        double elevation = elevationResults[j].elevation;
+                        int color = getColorByElevation(elevation);
+                        colors.add(color);
+                    } else {
+                        colors.add(Color.GRAY);
+                    }
                 }
             }
+
+            int start = 0;
+            int end = 0;
+            int zIndex = 1;
+
+            List<LatLng> segment = new ArrayList<>();
+            int currentColor = colors.get(0);
+
+            for (int i = 0; i < coordinates.size(); i++) {
+                if (colors.get(i) == currentColor) {
+                    segment.add(coordinates.get(i));
+                } else {
+                    PolylineOptions polylineOptions = new PolylineOptions().addAll(segment);
+                    polylineOptions.color(currentColor);
+                    polylineOptions.zIndex(zIndex++);
+                    polylineOptions.width(8);
+
+                    Polyline segmentPolyline = mMap.addPolyline(polylineOptions);
+                    polylineList.add(segmentPolyline);
+
+                    segment.clear();
+                    segment.add(coordinates.get(i));
+                    currentColor = colors.get(i);
+                }
+            }
+
+            if (!segment.isEmpty()) {
+                PolylineOptions polylineOptions = new PolylineOptions().addAll(segment);
+                polylineOptions.color(currentColor);
+                polylineOptions.zIndex(zIndex++);
+                polylineOptions.width(8);
+
+                Polyline segmentPolyline = mMap.addPolyline(polylineOptions);
+                polylineList.add(segmentPolyline);
+            }
+
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            for (LatLng latLng : coordinates) {
+                builder.include(latLng);
+            }
+            LatLngBounds bounds = builder.build();
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+
         } catch (Exception e) {
             Log.e("ElevationApi", "Error occurred: " + e.getMessage());
         }
-
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        for (LatLng latLng : currentPolyline.getPoints()) {
-            builder.include(latLng);
-        }
-        LatLngBounds bounds = builder.build();
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
     }
+
+    private void clearPolylines() {
+        for (Polyline polyline : polylineList) {
+            polyline.remove();
+        }
+        polylineList.clear();
+    }
+
+    private com.google.maps.model.LatLng[] getLatLngArray(DirectionsResult directionsResult) {
+        List<com.google.maps.model.LatLng> latLngList = new ArrayList<>();
+
+        for (int i = 0; i < directionsResult.routes.length; i++) {
+            com.google.maps.model.LatLng[] path = directionsResult.routes[i].overviewPolyline.decodePath().toArray(new com.google.maps.model.LatLng[0]);
+
+            for (int j = 0; j < path.length; j++) {
+                Log.d("PathPoint", "Lat: " + path[j].lat + ", Lng: " + path[j].lng);
+                latLngList.add(path[j]);
+            }
+        }
+
+        return latLngList.toArray(new com.google.maps.model.LatLng[0]);
+    }
+
     private int getColorByElevation(double elevation) {
-        // Menentukan logika pemetaan warna berdasarkan elevasi
-        // Misalnya, jika elevasi di bawah 100 meter, warna polyline akan merah
-        if (elevation < 600) {
-            return Color.RED;
+        // Menentukan warna berdasarkan kisaran elevasi
+        if (elevation < 100) {
+            return Color.rgb(255, 0, 0); // Merah
+        } else if (elevation < 200) {
+            return Color.rgb(255, 128, 0); // Oranye
+        } else if (elevation < 300) {
+            return Color.rgb(255, 255, 0); // Kuning
+        } else if (elevation < 400) {
+            return Color.rgb(128, 255, 0); // Hijau Terang
+        } else if (elevation < 500) {
+            return Color.rgb(0, 255, 0); // Hijau
+        } else if (elevation < 600) {
+            return Color.rgb(0, 255, 128); // Hijau Laut
         } else if (elevation < 700) {
-            return Color.YELLOW;
+            return Color.rgb(0, 128, 255); // Biru Terang
+        } else if (elevation < 800) {
+            return Color.rgb(0, 0, 255); // Biru
+        } else if (elevation < 900) {
+            return Color.rgb(128, 0, 255); // Ungu
         } else {
-            return Color.GREEN;
+            return Color.rgb(255, 0, 255); // Magenta
         }
     }
 }

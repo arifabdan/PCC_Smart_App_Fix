@@ -51,4 +51,21 @@
         android:layout_alignParentBottom="true"
         android:background="#808080"/>
 
+    <!-- Button "Pantau Event" -->
+    <Button
+        android:id="@+id/pantau_event_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pantau Event"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"/>
+
+    <!-- Button "Daftar Diri" -->
+    <Button
+        android:id="@+id/daftar_diri_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Daftar Diri"
+        android:layout_marginBottom="10dp"/>
+
 </LinearLayout>

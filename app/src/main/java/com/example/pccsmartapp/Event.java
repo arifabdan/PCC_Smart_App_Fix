@@ -2,6 +2,7 @@ package com.example.pccsmartapp;
 
 public class Event {
 
+    private String id;
     private String eventName;
     private String start;
     private String finish;
@@ -20,6 +21,13 @@ public class Event {
         this.eventDate = eventDate;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     // Getter dan setter (sesuaikan kebutuhan)
     public String getEventName() {

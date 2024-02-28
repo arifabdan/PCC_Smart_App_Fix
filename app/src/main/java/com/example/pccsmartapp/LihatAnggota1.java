@@ -139,7 +139,7 @@ public class LihatAnggota1 extends AppCompatActivity implements OnMapReadyCallba
                                             focusCameraOnLocation(location);
                                         }
                                         // Lakukan sesuatu dengan username, misalnya tampilkan notifikasi
-                                        showNotification("Status Berubah", username + " telah jatuh");
+                                        showNotification("WARNING!", username + " telah terjatuh");
                                     }
                                 }
                             }

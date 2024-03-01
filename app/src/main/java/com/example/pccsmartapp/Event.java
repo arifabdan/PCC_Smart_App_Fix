@@ -4,6 +4,7 @@ public class Event {
 
     private String id;
     private String eventName;
+    private String fase;
     private String start;
     private String finish;
     private String description;
@@ -13,8 +14,19 @@ public class Event {
 
     }
 
-    public Event(String eventName, String start, String finish, String description, String eventDate) {
+    public Event(String eventName,String fase, String start, String finish, String description, String eventDate) {
         this.eventName = eventName;
+        this.fase = fase;
+        this.start = start;
+        this.finish = finish;
+        this.description = description;
+        this.eventDate = eventDate;
+    }
+
+    public Event(String id, String eventName,String fase, String start, String finish, String description, String eventDate) {
+        this.id = id; // Menyimpan ID event
+        this.eventName = eventName;
+        this.fase = fase;
         this.start = start;
         this.finish = finish;
         this.description = description;
@@ -30,6 +42,12 @@ public class Event {
     }
 
     // Getter dan setter (sesuaikan kebutuhan)
+    public String getFase(){
+        return fase;
+    }
+    public void setFase(String fase){
+        this.fase = fase;
+    }
     public String getEventName() {
         return eventName;
     }

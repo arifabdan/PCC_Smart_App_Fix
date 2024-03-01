@@ -1,7 +1,7 @@
 package com.example.pccsmartapp;
 
 public class User {
-    String email, username, tahungbg, role, password, lokasi, longitude, latitude, kecepatan;
+    String email, username, tahungbg, role, password;
 
     public User(){
 

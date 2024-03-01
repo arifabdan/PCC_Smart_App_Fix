@@ -19,6 +19,15 @@
         android:paddingTop="5dp"
         android:fontFamily="@font/poppins"/>
     <TextView
+        android:id="@+id/fasetxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fase :"
+        android:paddingLeft="5dp"
+        android:paddingTop="5dp"
+        android:fontFamily="@font/poppins"/>
+
+    <TextView
         android:id="@+id/StartTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

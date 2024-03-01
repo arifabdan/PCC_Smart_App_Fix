@@ -63,9 +63,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback {
-    private EditText namatxt, start, finish, deskripsi;
+    private EditText namatxt, triptxt, deskripsi;
     private DatePicker tanggal;
-    private Button tambahTujuan, tambahEvent;
+    private Button tambahEvent;
     private DatabaseReference mDatabase;
     private GoogleMap mMap;
     private Polyline currentPolyline;
@@ -90,6 +90,7 @@ public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback
         }
 
         namatxt = findViewById(R.id.namaevent);
+        triptxt = findViewById(R.id.faseevent);
         deskripsi = findViewById(R.id.deskripsi);
         tanggal = findViewById(R.id.tanggalPicker);
         tambahEvent = findViewById(R.id.simpanevent);
@@ -114,10 +115,12 @@ public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback
                 selectedStartPlace = place;
                 Log.i(TAG, "Start Place: " + place.getName() + ", " + place.getId());
 
+
                 // Proses jalur setelah kedua lokasi dipilih
                 if (selectedStartPlace != null && selectedFinishPlace != null) {
                     processDirections(selectedStartPlace, selectedFinishPlace);
                 }
+
             }
 
             @Override
@@ -158,6 +161,7 @@ public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 // Mendapatkan nilai dari elemen UI
                 String eventName = namatxt.getText().toString().trim();
+                String tripEvent = triptxt.getText().toString().trim();
                 String eventDescription = deskripsi.getText().toString().trim();
 
                 // Mendapatkan tanggal dari DatePicker
@@ -175,7 +179,7 @@ public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback
                     String finishPlace = selectedFinishPlace.getName();
 
                     // Memanggil metode untuk menyimpan data event ke Firebase Database
-                    saveEventData(eventName, startPlace, finishPlace, eventDescription, eventDate);
+                    saveEventData(eventName, tripEvent ,startPlace, finishPlace, eventDescription, eventDate);
                 } else {
 
                     Toast.makeText(TambahEvent.this, "Pilih tempat terlebih dahulu", Toast.LENGTH_SHORT).show();
@@ -187,11 +191,11 @@ public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback
 
 
     // Metode untuk menyimpan data event ke Firebase Database
-    private void saveEventData (String eventName, String startPlace, String finishPlace, String description, String eventDate){
-        DatabaseReference eventRef = mDatabase.child("Events");
-        String eventId = eventRef.push().getKey();
+    private void saveEventData(String eventName, String tripEvent, String startPlace, String finishPlace, String description, String eventDate) {
+        DatabaseReference eventRef = mDatabase.child("Event");
+        String eventId = eventRef.push().getKey(); // Menghasilkan kunci acak yang unik
 
-        Event event = new Event(eventName, startPlace, finishPlace, description, eventDate);
+        Event event = new Event(eventId, eventName, tripEvent, startPlace, finishPlace, description, eventDate); // Memasukkan eventId ke objek Event
 
         mDatabase.child("Event").child(eventId).setValue(event)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {

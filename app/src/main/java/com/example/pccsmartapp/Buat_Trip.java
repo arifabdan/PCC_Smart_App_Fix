@@ -4,30 +4,18 @@ import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Location;
-import android.location.LocationManager;
-import android.location.LocationRequest;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,7 +26,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
@@ -51,21 +38,18 @@ import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.ElevationApi;
 import com.google.maps.GeoApiContext;
-import com.google.maps.PendingResult;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.ElevationResult;
 import com.google.maps.model.TravelMode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback {
-    private EditText namatxt, deskripsi;
-    private DatePicker tanggal;
-    private Button tambahEvent;
+public class Buat_Trip extends AppCompatActivity implements OnMapReadyCallback {
+    private EditText TripTxt;
+    private Button tambahTrip;
     private DatabaseReference mDatabase;
     private GoogleMap mMap;
     private Polyline currentPolyline;
@@ -74,11 +58,18 @@ public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback
     private Place selectedFinishPlace;
     private AtomicBoolean isMapReady = new AtomicBoolean(false);
     private List<Polyline> polylineList = new ArrayList<>();
+    private String selectedEventId;
+
+    public void setSelectedEventId(String eventId) {
+        this.selectedEventId = eventId;
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tambah_event);
+        setContentView(R.layout.activity_buat_trip);
+        getSupportActionBar().hide();
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -89,12 +80,8 @@ public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback
             mapFragment.getMapAsync(this);
         }
 
-        namatxt = findViewById(R.id.namaevent);
-        deskripsi = findViewById(R.id.deskripsi);
-        tanggal = findViewById(R.id.tanggalPicker);
-        tambahEvent = findViewById(R.id.simpanevent);
-
-
+        TripTxt = findViewById(R.id.faseevent);
+        tambahTrip = findViewById(R.id.simpantrip);
 
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyCEC70VvQ3VeOESBOy3XpwSwVlTYYU_sbo");
@@ -155,54 +142,45 @@ public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback
 
 
         // Set listener untuk tombol tambahEvent
-        tambahEvent.setOnClickListener(new View.OnClickListener() {
+        tambahTrip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Mendapatkan nilai dari elemen UI
-                String eventName = namatxt.getText().toString().trim();
-                String eventDescription = deskripsi.getText().toString().trim();
-
-                // Mendapatkan tanggal dari DatePicker
-                int day = tanggal.getDayOfMonth();
-                int month = tanggal.getMonth() + 1; // Januari dimulai dari 0
-                int year = tanggal.getYear();
-
-                // Format tanggal ke dalam string
-                String eventDate = day + "/" + month + "/" + year;
+                String tripEvent = TripTxt.getText().toString().trim();
 
                 // Memeriksa apakah tempat sudah dipilih
                 if (selectedStartPlace != null && selectedFinishPlace != null) {
-                    // Mendapatkan nama tempat dari AutocompleteSupportFragment
-                    String startPlace = selectedStartPlace.getName();
-                    String finishPlace = selectedFinishPlace.getName();
+                    if (selectedEventId != null) { // Memeriksa apakah eventId sudah dipilih
+                        // Mendapatkan nama tempat dari AutocompleteSupportFragment
+                        String startPlace = selectedStartPlace.getName();
+                        String finishPlace = selectedFinishPlace.getName();
 
-                    // Memanggil metode untuk menyimpan data event ke Firebase Database
-                    saveEventData(eventName, eventDescription, eventDate);
+                        // Memanggil metode untuk menyimpan data event ke Firebase Database
+                        saveTripData(selectedEventId, tripEvent, startPlace, finishPlace);
+                    } else {
+                        Toast.makeText(Buat_Trip.this, "Pilih event terlebih dahulu", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-
-                    Toast.makeText(TambahEvent.this, "Pilih tempat terlebih dahulu", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Buat_Trip.this, "Pilih tempat terlebih dahulu", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
     }
 
+    private void saveTripData(String eventId, String tripEvent, String startPlace, String finishPlace) {
+        DatabaseReference eventRef = mDatabase.child("Event").child(eventId).child("Trip");
+        String tripId = eventRef.push().getKey();
 
-    // Metode untuk menyimpan data event ke Firebase Database
-    private void saveEventData(String eventName, String description, String eventDate) {
-        DatabaseReference eventRef = mDatabase.child("Event");
-        String eventId = eventRef.push().getKey(); // Menghasilkan kunci acak yang unik
+        Trip trip = new Trip(tripId, tripEvent, startPlace, finishPlace);
 
-        Event event = new Event(eventId, eventName, description, eventDate); // Memasukkan eventId ke objek Event
-
-        mDatabase.child("Event").child(eventId).setValue(event)
+        eventRef.child(tripId).setValue(trip)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            Toast.makeText(TambahEvent.this, "Tambah Event Berhasil", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Buat_Trip.this, "Tambah Trip Berhasil", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(TambahEvent.this, "Tambah Event Gagal", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Buat_Trip.this, "Tambah Trip Gagal", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -215,7 +193,7 @@ public class TambahEvent extends AppCompatActivity implements OnMapReadyCallback
         String startLocation = startLatLng.latitude + "," + startLatLng.longitude;
         String finishLocation = finishLatLng.latitude + "," + finishLatLng.longitude;
 
-        DirectionsTask directionsTask = new DirectionsTask();
+        Buat_Trip.DirectionsTask directionsTask = new Buat_Trip.DirectionsTask();
         directionsTask.execute(startLocation, finishLocation);
     }
 

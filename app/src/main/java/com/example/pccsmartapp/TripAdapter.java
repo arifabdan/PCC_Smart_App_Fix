@@ -33,27 +33,27 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
-public class EventAdapter extends FirebaseRecyclerAdapter<Event, EventAdapter.EventViewHolder> {
-private DatabaseReference databaseRef;
-private FirebaseDatabase firebaseDatabase;
-    private List<Event> eventList;
+public class TripAdapter extends FirebaseRecyclerAdapter<Trip, TripAdapter.TripViewHolder> {
+    private DatabaseReference databaseRef;
+    private FirebaseDatabase firebaseDatabase;
+    private List<Trip> tripList;
     private Context context;
 
 
-    public EventAdapter(@NonNull FirebaseRecyclerOptions<Event> options, Context context) {
+    public TripAdapter(@NonNull FirebaseRecyclerOptions<Trip> options, Context context) {
         super(options);
         this.context = context;
-        this.eventList = eventList;
+        this.tripList = tripList;
         databaseRef = FirebaseDatabase.getInstance().getReference().child("Event");
     }
 
-    public EventAdapter(FirebaseRecyclerOptions<Event> options) {
+    public TripAdapter(FirebaseRecyclerOptions<Trip> options) {
         super(options);
     }
 
 
     @Override
-    protected void onBindViewHolder(@NonNull EventViewHolder holder, int position, @NonNull Event model) {
+    protected void onBindViewHolder(@NonNull TripViewHolder holder, int position, @NonNull Trip model) {
         DatabaseReference ref = getRef(position);
         // Dapatkan ID dari referensi Firebase
         String eventId = ref.getKey();
@@ -63,32 +63,34 @@ private FirebaseDatabase firebaseDatabase;
 
     @NonNull
     @Override
-    public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public TripViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // Create ViewHolder
         Context context = parent.getContext(); // Dapatkan context dari parent
-        View view = LayoutInflater.from(context).inflate(R.layout.item_event, parent, false);
-        return new EventViewHolder(view, context); // Panggil konstruktor dengan dua parameter
+        View view = LayoutInflater.from(context).inflate(R.layout.item_trip, parent, false);
+        return new TripViewHolder(view, context); // Panggil konstruktor dengan dua parameter
     }
 
     // ViewHolder untuk menangani tampilan setiap item di RecyclerView
-    public class EventViewHolder extends RecyclerView.ViewHolder {
-        private TextView namaTextView,faseTxt,startTxt,finishTxt,TanggalTxt;
-        private Button pantauEventButton;
+    public class TripViewHolder extends RecyclerView.ViewHolder {
+        private TextView TripTextView, startTxt,finishTxt;
+        private Button pantautripButton;
         private Button daftarDiriButton;
+        private Button tambahTripButton;
         private LocationManager locationManager;
         private LocationListener locationListener;
         private Context context;
 
 
 
-        public EventViewHolder(@NonNull View itemView, Context context) {
+        public TripViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
             this.context = context;
-            namaTextView = itemView.findViewById(R.id.namaTextView);
+            TripTextView = itemView.findViewById(R.id.namaTextView);
             startTxt = itemView.findViewById(R.id.StartTextView);
             finishTxt = itemView.findViewById(R.id.FinishTextView);
-            TanggalTxt = itemView.findViewById(R.id.TanggalTextView);
+            pantautripButton =itemView.findViewById(R.id.pantau_trip_button);
             daftarDiriButton = itemView.findViewById(R.id.daftar_diri_button);
+            tambahTripButton = itemView.findViewById(R.id.tambah_trip_button);
             locationManager = (LocationManager) itemView.getContext().getSystemService(Context.LOCATION_SERVICE);
             // Inisialisasi LocationListener
             locationListener = new LocationListener() {
@@ -115,15 +117,17 @@ private FirebaseDatabase firebaseDatabase;
             }
         }
 
-        public void bind(Event event, String eventId) {
-            namaTextView.setText("Nama Event : " + event.getEventName());
-            TanggalTxt.setText("Tanggal Event : " + event.getEventDate());
-            pantauEventButton.setOnClickListener(new View.OnClickListener() {
+        public void bind(Trip trip, String eventId, String tripId) {
+            TripTextView.setText("Trip : " + trip.getTrip());
+            startTxt.setText("Start Trip : " + trip.getStart());
+            finishTxt.setText("Finish Trip : " + trip.getFinish());
+
+            pantautripButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     // Buka halaman baru yang berisi peta dengan polylines
                     Intent intent = new Intent(context, PantauEvent.class);
-                    intent.putExtra("eventId", eventId);
+                    intent.putExtra("tripId", tripId);
                     context.startActivity(intent);
 
                 }
@@ -149,14 +153,14 @@ private FirebaseDatabase firebaseDatabase;
                         return;
                     }
 
-                    Event event = getItem(position);
-                    if (event == null) {
+                    Trip trip = getItem(position);
+                    if (trip == null) {
                         Toast.makeText(context, "Gagal mendaftar! Data acara tidak valid.", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    String eventId = event.getId();
-                    if (eventId == null || eventId.isEmpty()) {
+                    String tripId = Trip.getId();
+                    if (tripId == null || tripId.isEmpty()) {
                         Toast.makeText(context, "Gagal mendaftar! ID acara tidak valid.", Toast.LENGTH_SHORT).show();
                         return;
                     }

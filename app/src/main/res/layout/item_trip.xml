@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- res/layout/item_event.xml -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -11,20 +10,29 @@
     >
 
     <TextView
-        android:id="@+id/namaTextView"
+        android:id="@+id/triptxt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nama Event: "
+        android:text="Trip :"
         android:paddingLeft="5dp"
         android:paddingTop="5dp"
         android:fontFamily="@font/poppins"/>
+
     <TextView
-        android:id="@+id/TanggalTextView"
+        android:id="@+id/StartTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Tanggal : "
+        android:text="Start : "
         android:paddingLeft="5dp"
         android:fontFamily="@font/poppins"/>
+    <TextView
+        android:id="@+id/FinishTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Finish : "
+        android:paddingLeft="5dp"
+        android:fontFamily="@font/poppins"/>
+
 
 
     <TextView
@@ -39,12 +47,28 @@
 
     <!-- Button "Pantau Event" -->
     <Button
-        android:id="@+id/lihat_event_button"
+        android:id="@+id/pantau_trip_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Lihat Event"
+        android:text="Pantau Trip"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"/>
 
+    <!-- Button "Daftar Diri" -->
+    <Button
+        android:id="@+id/daftar_diri_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Daftar Diri"
+        android:layout_marginBottom="10dp"
+        />
+
+    <Button
+        android:id="@+id/tambah_trip_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tambah Trip"
+        android:layout_marginBottom="10dp"
+        />
 
 </LinearLayout>

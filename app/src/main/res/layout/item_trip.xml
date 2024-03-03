@@ -63,12 +63,5 @@
         android:layout_marginBottom="10dp"
         />
 
-    <Button
-        android:id="@+id/tambah_trip_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Tambah Trip"
-        android:layout_marginBottom="10dp"
-        />
 
 </LinearLayout>

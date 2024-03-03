@@ -5,6 +5,7 @@ import static android.content.ContentValues.TAG;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -60,22 +61,21 @@ public class Buat_Trip extends AppCompatActivity implements OnMapReadyCallback {
     private List<Polyline> polylineList = new ArrayList<>();
     private String selectedEventId;
 
-    public void setSelectedEventId(String eventId) {
-        this.selectedEventId = eventId;
-    }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_buat_trip);
-        getSupportActionBar().hide();
+        Intent intent = getIntent();
+        if (intent != null) {
+            selectedEventId = intent.getStringExtra("selectedEventId");
+        }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.maps);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.maps_trip);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
@@ -167,6 +167,11 @@ public class Buat_Trip extends AppCompatActivity implements OnMapReadyCallback {
         });
     }
 
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("selectedEventId", selectedEventId);
+    }
+
     private void saveTripData(String eventId, String tripEvent, String startPlace, String finishPlace) {
         DatabaseReference eventRef = mDatabase.child("Event").child(eventId).child("Trip");
         String tripId = eventRef.push().getKey();
@@ -222,7 +227,7 @@ public class Buat_Trip extends AppCompatActivity implements OnMapReadyCallback {
             // Membuat permintaan Directions API
             DirectionsApiRequest directionsApiRequest = DirectionsApi.getDirections(geoApiContext,
                     startLocation, destinationLocation);
-            directionsApiRequest.mode(TravelMode.WALKING);
+            directionsApiRequest.mode(TravelMode.BICYCLING);
 
             try {
                 // Mengirim permintaan ke API dan menerima respons

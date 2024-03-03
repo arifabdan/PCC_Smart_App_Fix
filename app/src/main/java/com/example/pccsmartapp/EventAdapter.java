@@ -73,8 +73,7 @@ private FirebaseDatabase firebaseDatabase;
     // ViewHolder untuk menangani tampilan setiap item di RecyclerView
     public class EventViewHolder extends RecyclerView.ViewHolder {
         private TextView namaTextView,faseTxt,startTxt,finishTxt,TanggalTxt;
-        private Button pantauEventButton;
-        private Button daftarDiriButton;
+        private Button LihatEventButton, TambahTripButton;
         private LocationManager locationManager;
         private LocationListener locationListener;
         private Context context;
@@ -88,7 +87,8 @@ private FirebaseDatabase firebaseDatabase;
             startTxt = itemView.findViewById(R.id.StartTextView);
             finishTxt = itemView.findViewById(R.id.FinishTextView);
             TanggalTxt = itemView.findViewById(R.id.TanggalTextView);
-            daftarDiriButton = itemView.findViewById(R.id.daftar_diri_button);
+            LihatEventButton = itemView.findViewById(R.id.lihat_event_button);
+            TambahTripButton = itemView.findViewById(R.id.tambah_trip_button);
             locationManager = (LocationManager) itemView.getContext().getSystemService(Context.LOCATION_SERVICE);
             // Inisialisasi LocationListener
             locationListener = new LocationListener() {
@@ -118,91 +118,22 @@ private FirebaseDatabase firebaseDatabase;
         public void bind(Event event, String eventId) {
             namaTextView.setText("Nama Event : " + event.getEventName());
             TanggalTxt.setText("Tanggal Event : " + event.getEventDate());
-            pantauEventButton.setOnClickListener(new View.OnClickListener() {
+            LihatEventButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // Buka halaman baru yang berisi peta dengan polylines
-                    Intent intent = new Intent(context, PantauEvent.class);
-                    intent.putExtra("eventId", eventId);
+                    // Buka halaman baru yang menampilkan daftar trip dari event yang dipilih
+                    Intent intent = new Intent(context, ListTrip.class);
+                    intent.putExtra("selectedEventId", eventId); // Mengirim eventId ke PantauEve
                     context.startActivity(intent);
-
                 }
             });
 
-            daftarDiriButton.setOnClickListener(new View.OnClickListener() {
+            TambahTripButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // Memeriksa apakah pengguna sudah login
-                    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                    if (currentUser == null) {
-                        Toast.makeText(context, "Gagal mendaftar! Harap login terlebih dahulu.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    // Dapatkan data pengguna yang sesungguhnya dari Firebase Authentication
-                    String userId = currentUser.getUid();
-
-                    // Mendapatkan posisi adapter dan data acara
-                    int position = getAdapterPosition();
-                    if (position == RecyclerView.NO_POSITION) {
-                        Toast.makeText(context, "Gagal mendaftar! Tidak ada item yang dipilih.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    Event event = getItem(position);
-                    if (event == null) {
-                        Toast.makeText(context, "Gagal mendaftar! Data acara tidak valid.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    String eventId = event.getId();
-                    if (eventId == null || eventId.isEmpty()) {
-                        Toast.makeText(context, "Gagal mendaftar! ID acara tidak valid.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    // Dapatkan lokasi terkini
-                    @SuppressLint("MissingPermission") Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    if (lastLocation == null) {
-                        Toast.makeText(context, "Gagal mendapatkan lokasi. Pastikan GPS Anda aktif.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    // Memperoleh data lokasi
-                    double latitude = lastLocation.getLatitude();
-                    double longitude = lastLocation.getLongitude();
-
-                    // Dapatkan referensi ke data pengguna di Firebase Database
-                    DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference().child("users").child(userId);
-                    usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            if (dataSnapshot.exists()) {
-                                // Data pengguna tersedia, Anda bisa mengambil username di sini
-                                String username = dataSnapshot.child("username").getValue(String.class);
-
-                                // Mendapatkan referensi ke event di Firebase Database
-                                DatabaseReference eventRef = FirebaseDatabase.getInstance().getReference().child("Event").child(eventId);
-                                // Mendapatkan referensi ke node anggota event di bawah event yang bersangkutan
-                                DatabaseReference memberRef = eventRef.child("peserta").child(userId);
-
-                                // Simpan data pengguna ke dalam node anggota event
-                                memberRef.child("username").setValue(username);
-                                memberRef.child("latitude").setValue(latitude);
-                                memberRef.child("longitude").setValue(longitude);
-
-                                Toast.makeText(context, "Berhasil mendaftar!", Toast.LENGTH_SHORT).show();
-                            } else {
-                                // Data pengguna tidak tersedia di Firebase Database
-                                Toast.makeText(context, "Gagal mendaftar! Data pengguna tidak ditemukan.", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-                            // Penanganan kesalahan
-                        }
-                    });
+                    Intent intent = new Intent(context, Buat_Trip.class);
+                    intent.putExtra("selectedEventId", eventId);
+                    context.startActivity(intent);
                 }
             });
 

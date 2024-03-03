@@ -81,11 +81,20 @@ public class PantauEvent extends AppCompatActivity implements OnMapReadyCallback
     private double THRESHOLD_FALL=20.6;
     private String currentStatus = "Normal";
 
+    private String SelectedTripId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pantau_event);
         getSupportActionBar().hide();
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            SelectedTripId = intent.getStringExtra("SelectedTripId");
+        }
+
+
         FirebaseApp.initializeApp(this);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -99,10 +108,6 @@ public class PantauEvent extends AppCompatActivity implements OnMapReadyCallback
             mapFragment.getMapAsync(this);
         }
 
-        Intent intent = getIntent();
-        if (intent != null) {
-            eventId = intent.getStringExtra("eventId");
-        }
         userLocationData = FirebaseDatabase.getInstance().getReference().child("Event").child(eventId).child("peserta");
         userLocationData.addValueEventListener(new ValueEventListener() {
             @Override
@@ -252,7 +257,7 @@ public class PantauEvent extends AppCompatActivity implements OnMapReadyCallback
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
 
-        DatabaseReference eventRef = userLocationData.child("Event").child(eventId);
+        DatabaseReference eventRef = FirebaseDatabase.getInstance().getReference().child("Event").child(eventId).child("Trip").child(SelectedTripId);
         eventRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -309,6 +314,7 @@ public class PantauEvent extends AppCompatActivity implements OnMapReadyCallback
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
         }
     }
+
     private void reqLocationUpdates() {
         LocationRequest locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)

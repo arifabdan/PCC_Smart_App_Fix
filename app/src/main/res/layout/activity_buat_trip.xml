@@ -7,9 +7,6 @@
     tools:context=".Buat_Trip"
     >
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
         <LinearLayout
             android:id="@+id/inputlayout"
@@ -57,7 +54,7 @@
                 tools:ignore="MissingConstraints" />
 
             <fragment
-                android:id="@+id/maps"
+                android:id="@+id/maps_trip"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
                 android:layout_marginTop="4dp"
@@ -66,14 +63,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
-
-            <EditText
-                android:id="@+id/deskripsi"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Deskripsi Event"
-                android:inputType="textMultiLine"
-                android:lines="5" />
 
 
             <Button
@@ -86,6 +75,5 @@
                 android:textColor="@android:color/white"/>
         </LinearLayout>
 
-    </ScrollView>
 
 </RelativeLayout>

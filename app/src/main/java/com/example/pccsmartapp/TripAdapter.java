@@ -39,6 +39,8 @@ public class TripAdapter extends FirebaseRecyclerAdapter<Trip, TripAdapter.TripV
     private List<Trip> tripList;
     private Context context;
 
+    private String selectedEventId;
+
 
     public TripAdapter(@NonNull FirebaseRecyclerOptions<Trip> options, Context context) {
         super(options);
@@ -51,14 +53,18 @@ public class TripAdapter extends FirebaseRecyclerAdapter<Trip, TripAdapter.TripV
         super(options);
     }
 
+    public void setSelectedEventId(String eventId) {
+        this.selectedEventId = eventId;
+    }
 
     @Override
     protected void onBindViewHolder(@NonNull TripViewHolder holder, int position, @NonNull Trip model) {
         DatabaseReference ref = getRef(position);
         // Dapatkan ID dari referensi Firebase
-        String eventId = ref.getKey();
+        String eventId = ref.getParent().getKey();
+        String tripId = ref.getKey();
         // Kemudian Anda dapat menggunakan ID event ini sesuai kebutuhan Anda
-        holder.bind(model, eventId);
+        holder.bind(model, eventId, tripId);
     }
 
     @NonNull
@@ -75,22 +81,23 @@ public class TripAdapter extends FirebaseRecyclerAdapter<Trip, TripAdapter.TripV
         private TextView TripTextView, startTxt,finishTxt;
         private Button pantautripButton;
         private Button daftarDiriButton;
-        private Button tambahTripButton;
+
         private LocationManager locationManager;
         private LocationListener locationListener;
         private Context context;
+
+        private String selectedEventId;
 
 
 
         public TripViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
             this.context = context;
-            TripTextView = itemView.findViewById(R.id.namaTextView);
+            TripTextView = itemView.findViewById(R.id.triptxt);
             startTxt = itemView.findViewById(R.id.StartTextView);
             finishTxt = itemView.findViewById(R.id.FinishTextView);
             pantautripButton =itemView.findViewById(R.id.pantau_trip_button);
             daftarDiriButton = itemView.findViewById(R.id.daftar_diri_button);
-            tambahTripButton = itemView.findViewById(R.id.tambah_trip_button);
             locationManager = (LocationManager) itemView.getContext().getSystemService(Context.LOCATION_SERVICE);
             // Inisialisasi LocationListener
             locationListener = new LocationListener() {
@@ -122,14 +129,19 @@ public class TripAdapter extends FirebaseRecyclerAdapter<Trip, TripAdapter.TripV
             startTxt.setText("Start Trip : " + trip.getStart());
             finishTxt.setText("Finish Trip : " + trip.getFinish());
 
+            daftarDiriButton.setTag(eventId); // Tetapkan tag tombol dengan tripId
+
+            // Dapatkan referensi ke Firebase Database menggunakan tripId
+            DatabaseReference tripRef = FirebaseDatabase.getInstance().getReference()
+                    .child("Event").child(eventId).child("Trip").child(tripId);
+
             pantautripButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     // Buka halaman baru yang berisi peta dengan polylines
                     Intent intent = new Intent(context, PantauEvent.class);
-                    intent.putExtra("tripId", tripId);
+                    intent.putExtra("SelectedTripId", tripId);
                     context.startActivity(intent);
-
                 }
             });
 
@@ -146,20 +158,8 @@ public class TripAdapter extends FirebaseRecyclerAdapter<Trip, TripAdapter.TripV
                     // Dapatkan data pengguna yang sesungguhnya dari Firebase Authentication
                     String userId = currentUser.getUid();
 
-                    // Mendapatkan posisi adapter dan data acara
-                    int position = getAdapterPosition();
-                    if (position == RecyclerView.NO_POSITION) {
-                        Toast.makeText(context, "Gagal mendaftar! Tidak ada item yang dipilih.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    Trip trip = getItem(position);
-                    if (trip == null) {
-                        Toast.makeText(context, "Gagal mendaftar! Data acara tidak valid.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    String tripId = Trip.getId();
+                    // Dapatkan id trip dari tag tombol
+                    String tripId = (String) v.getTag();
                     if (tripId == null || tripId.isEmpty()) {
                         Toast.makeText(context, "Gagal mendaftar! ID acara tidak valid.", Toast.LENGTH_SHORT).show();
                         return;
@@ -186,9 +186,8 @@ public class TripAdapter extends FirebaseRecyclerAdapter<Trip, TripAdapter.TripV
                                 String username = dataSnapshot.child("username").getValue(String.class);
 
                                 // Mendapatkan referensi ke event di Firebase Database
-                                DatabaseReference eventRef = FirebaseDatabase.getInstance().getReference().child("Event").child(eventId);
-                                // Mendapatkan referensi ke node anggota event di bawah event yang bersangkutan
-                                DatabaseReference memberRef = eventRef.child("peserta").child(userId);
+
+                                DatabaseReference memberRef = tripRef.child("peserta").child(userId);
 
                                 // Simpan data pengguna ke dalam node anggota event
                                 memberRef.child("username").setValue(username);
@@ -209,7 +208,6 @@ public class TripAdapter extends FirebaseRecyclerAdapter<Trip, TripAdapter.TripV
                     });
                 }
             });
-
         }
 
     }

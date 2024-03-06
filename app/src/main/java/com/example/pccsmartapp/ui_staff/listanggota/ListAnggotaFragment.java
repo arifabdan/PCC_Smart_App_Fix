@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,6 +23,7 @@ import com.example.pccsmartapp.databinding.FragmentListAnggota2Binding;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -61,6 +63,33 @@ public class ListAnggotaFragment extends Fragment {
         // Initialize MemberAdapter
         anggotaAdapter = new AnggotaAdapter(options);
         recyclerView.setAdapter(anggotaAdapter);
+
+        database.getReference("users").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
+                anggotaAdapter.notifyDataSetChanged(); // Memperbarui adapter saat ada penambahan data baru
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
+                anggotaAdapter.notifyDataSetChanged(); // Memperbarui adapter saat ada perubahan data
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                anggotaAdapter.notifyDataSetChanged(); // Memperbarui adapter saat ada penghapusan data
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
+                // Tidak melakukan apa pun saat ada perubahan urutan data
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Error handling
+            }
+        });
 
         return root;
     }

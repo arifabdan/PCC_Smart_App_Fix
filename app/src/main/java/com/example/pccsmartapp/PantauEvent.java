@@ -81,7 +81,7 @@ public class PantauEvent extends AppCompatActivity implements OnMapReadyCallback
     private double THRESHOLD_FALL=20.6;
     private String currentStatus = "Normal";
 
-    private String SelectedTripId;
+    private String SelectedEventId,SelectedTripId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +91,7 @@ public class PantauEvent extends AppCompatActivity implements OnMapReadyCallback
 
         Intent intent = getIntent();
         if (intent != null) {
+            SelectedEventId = intent.getStringExtra("SelectedEventId");
             SelectedTripId = intent.getStringExtra("SelectedTripId");
         }
 
@@ -108,7 +109,7 @@ public class PantauEvent extends AppCompatActivity implements OnMapReadyCallback
             mapFragment.getMapAsync(this);
         }
 
-        userLocationData = FirebaseDatabase.getInstance().getReference().child("Event").child(eventId).child("peserta");
+        userLocationData = FirebaseDatabase.getInstance().getReference().child("Event").child(SelectedEventId).child("Trip").child(SelectedTripId).child("peserta");
         userLocationData.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -257,7 +258,7 @@ public class PantauEvent extends AppCompatActivity implements OnMapReadyCallback
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
 
-        DatabaseReference eventRef = FirebaseDatabase.getInstance().getReference().child("Event").child(eventId).child("Trip").child(SelectedTripId);
+        DatabaseReference eventRef = FirebaseDatabase.getInstance().getReference().child("Event").child(SelectedEventId).child("Trip").child(SelectedTripId);
         eventRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

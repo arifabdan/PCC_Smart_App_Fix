@@ -33,8 +33,11 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.ElevationApi;
@@ -174,21 +177,36 @@ public class Buat_Trip extends AppCompatActivity implements OnMapReadyCallback {
 
     private void saveTripData(String eventId, String tripEvent, String startPlace, String finishPlace) {
         DatabaseReference eventRef = mDatabase.child("Event").child(eventId).child("Trip");
-        String tripId = eventRef.push().getKey();
 
-        Trip trip = new Trip(tripId, tripEvent, startPlace, finishPlace);
+        eventRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                long eventCount = dataSnapshot.getChildrenCount();
 
-        eventRef.child(tripId).setValue(trip)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(Buat_Trip.this, "Tambah Trip Berhasil", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(Buat_Trip.this, "Tambah Trip Gagal", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                // Membuat ID berurutan dengan menambahkan jumlah event saat ini
+                String tripID = String.valueOf(eventCount + 1);
+
+                Trip trip = new Trip(eventId, tripEvent, startPlace, finishPlace);
+
+                // Simpan data event beserta ID-nya ke Firebase Database
+                eventRef.child(tripID).setValue(trip)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(Buat_Trip.this, "Tambah Event Berhasil", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(Buat_Trip.this, "Tambah Event Gagal", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+            }
+                @Override
+                public void onCancelled (@NonNull DatabaseError databaseError){
+                    // Error handling jika pembacaan data gagal
+                    Toast.makeText(Buat_Trip.this, "Gagal membaca data", Toast.LENGTH_SHORT).show();
+                }
+            });
     }
 
     private void processDirections(Place startPlace, Place finishPlace) {
@@ -227,7 +245,7 @@ public class Buat_Trip extends AppCompatActivity implements OnMapReadyCallback {
             // Membuat permintaan Directions API
             DirectionsApiRequest directionsApiRequest = DirectionsApi.getDirections(geoApiContext,
                     startLocation, destinationLocation);
-            directionsApiRequest.mode(TravelMode.BICYCLING);
+            directionsApiRequest.mode(TravelMode.WALKING);
 
             try {
                 // Mengirim permintaan ke API dan menerima respons

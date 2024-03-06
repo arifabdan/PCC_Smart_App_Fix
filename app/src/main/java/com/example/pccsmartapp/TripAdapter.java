@@ -42,11 +42,13 @@ public class TripAdapter extends FirebaseRecyclerAdapter<Trip, TripAdapter.TripV
     private String selectedEventId;
 
 
-    public TripAdapter(@NonNull FirebaseRecyclerOptions<Trip> options, Context context) {
+    public TripAdapter(@NonNull FirebaseRecyclerOptions<Trip> options, Context context, String selectedEventId) {
         super(options);
         this.context = context;
         this.tripList = tripList;
+        this.selectedEventId = selectedEventId;
         databaseRef = FirebaseDatabase.getInstance().getReference().child("Event");
+
     }
 
     public TripAdapter(FirebaseRecyclerOptions<Trip> options) {
@@ -61,10 +63,9 @@ public class TripAdapter extends FirebaseRecyclerAdapter<Trip, TripAdapter.TripV
     protected void onBindViewHolder(@NonNull TripViewHolder holder, int position, @NonNull Trip model) {
         DatabaseReference ref = getRef(position);
         // Dapatkan ID dari referensi Firebase
-        String eventId = ref.getParent().getKey();
         String tripId = ref.getKey();
         // Kemudian Anda dapat menggunakan ID event ini sesuai kebutuhan Anda
-        holder.bind(model, eventId, tripId);
+        holder.bind(model, selectedEventId, tripId);
     }
 
     @NonNull
@@ -98,6 +99,7 @@ public class TripAdapter extends FirebaseRecyclerAdapter<Trip, TripAdapter.TripV
             finishTxt = itemView.findViewById(R.id.FinishTextView);
             pantautripButton =itemView.findViewById(R.id.pantau_trip_button);
             daftarDiriButton = itemView.findViewById(R.id.daftar_diri_button);
+
             locationManager = (LocationManager) itemView.getContext().getSystemService(Context.LOCATION_SERVICE);
             // Inisialisasi LocationListener
             locationListener = new LocationListener() {
@@ -124,22 +126,24 @@ public class TripAdapter extends FirebaseRecyclerAdapter<Trip, TripAdapter.TripV
             }
         }
 
-        public void bind(Trip trip, String eventId, String tripId) {
+        public void bind(Trip trip, String selectedEventId, String tripId) {
+
             TripTextView.setText("Trip : " + trip.getTrip());
             startTxt.setText("Start Trip : " + trip.getStart());
             finishTxt.setText("Finish Trip : " + trip.getFinish());
 
-            daftarDiriButton.setTag(eventId); // Tetapkan tag tombol dengan tripId
+            daftarDiriButton.setTag(tripId); // Tetapkan tag tombol dengan tripId
 
             // Dapatkan referensi ke Firebase Database menggunakan tripId
             DatabaseReference tripRef = FirebaseDatabase.getInstance().getReference()
-                    .child("Event").child(eventId).child("Trip").child(tripId);
+                    .child("Event").child(selectedEventId).child("Trip").child(tripId);
 
             pantautripButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     // Buka halaman baru yang berisi peta dengan polylines
                     Intent intent = new Intent(context, PantauEvent.class);
+                    intent.putExtra("SelectedEventId", selectedEventId);
                     intent.putExtra("SelectedTripId", tripId);
                     context.startActivity(intent);
                 }

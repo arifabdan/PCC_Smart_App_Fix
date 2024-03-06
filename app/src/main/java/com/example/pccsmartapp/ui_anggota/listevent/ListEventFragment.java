@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,6 +28,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
@@ -58,12 +62,39 @@ public class ListEventFragment extends Fragment  {
         // Setup FirebaseRecyclerOptions
         FirebaseRecyclerOptions<Event> options =
                 new FirebaseRecyclerOptions.Builder<Event>()
-                        .setQuery(database.getReference("Event").orderByChild("eventDate"), Event.class)
+                        .setQuery(database.getReference("Event").orderByKey(), Event.class)
                         .build();
 
-        // Initialize MemberAdapter
+        // Initialize EventAdapter
         eventAdapter = new EventAdapter(options);
         recyclerView.setAdapter(eventAdapter);
+
+        database.getReference("Event").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
+                eventAdapter.notifyDataSetChanged(); // Memperbarui adapter saat ada penambahan data baru
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
+                eventAdapter.notifyDataSetChanged(); // Memperbarui adapter saat ada perubahan data
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                eventAdapter.notifyDataSetChanged(); // Memperbarui adapter saat ada penghapusan data
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
+                // Tidak melakukan apa pun saat ada perubahan urutan data
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Error handling
+            }
+        });
 
         return root;
     }
